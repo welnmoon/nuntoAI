@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Tariffs {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+enum Visibility {
+  PRIVATE
+  SHARED
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  fullName String
+  email    String  @unique
+  password String  @default("")
+  image    String?
+
+  verified          DateTime?
+  provider          String?
+  providerId        String?
+  verificationToken VerificationToken[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chats   Chat[]
+  tariff  Tariffs  @default(FREE)
+  Payment Payment[]
+
+  @@unique([provider, providerId])
+}
+
+model Chat {
+  id Int    @id @default(autoincrement())
+  title  String
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  visibility Visibility @default(PRIVATE)
+  
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Message {
+  id        Int         @id @default(autoincrement())
+  content   String @db.Text
+  role      MessageRole
+  chatId    Int
+  chat      Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model VerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+
+model Payment {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int  
+
+  amount    Decimal @db.Decimal(10, 2)
+  currency  String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
