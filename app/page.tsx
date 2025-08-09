@@ -37,7 +37,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col justify-between px-6 py-6 pt-6 pb-3 max-w-xl mx-auto">
+    <main className="min-h-screen flex flex-col justify-between px-6 py-6 pt-6 pb-3 max-w-2xl mx-auto">
       {response && (
         <div className="mt-6 p-4 flex rounded whitespace-pre-wrap">
           {messages.map((m) => (
@@ -57,12 +57,12 @@ export default function Home() {
         className={`${
           messages.length > 0
             ? "sticky bottom-0"
-            : "flex-1 flex justify-center items-center"
+            : "flex-1 flex gap-5 justify-center items-center"
         }`}
       >
         {messages.length === 0 && (
           <h1 className="text-2xl font-bold text-center mb-2">
-            Добро пожаловать {session.data?.user.name}
+            Добро пожаловать {session.data?.user.name}!
           </h1>
         )}
         <SendToAIForm

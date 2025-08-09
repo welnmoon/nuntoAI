@@ -34,6 +34,7 @@ const LoginForm = () => {
       return;
     } else {
       toast.success("Вы успешно вошли в систему!");
+      redirect("/");
     }
   };
   return (
