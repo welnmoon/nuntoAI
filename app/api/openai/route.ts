@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       messages: [{ role: "user", content: message }],
       max_tokens: 1000,
     });
-
+    console.log("✅ OpenAI API response:", completion);
     if (!completion.choices || completion.choices.length === 0) {
       return NextResponse.json(
         { error: "No response from OpenAI API." },

@@ -23,7 +23,7 @@ export function Providers({
 
         <AppSidebar />
         <SidebarInset>{children}</SidebarInset>
-        <Toaster position="top-right" />
+        
       </SidebarProvider>
     </SessionProvider>
   );

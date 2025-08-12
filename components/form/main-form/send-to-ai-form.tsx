@@ -5,13 +5,22 @@ interface Props {
   input: string;
   setInput: (value: string) => void;
   loading: boolean;
+  width?: string;
 }
 
-const SendToAIForm = ({ handleSubmit, input, setInput, loading }: Props) => {
+const SendToAIForm = ({
+  handleSubmit,
+  input,
+  setInput,
+  loading,
+  width,
+}: Props) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="relative flex flex-col gap-4 w-full bg-white pb-3"
+      className={`relative flex flex-col gap-4 bg-white pb-3 ${
+        width ? width : "w-100"
+      }`}
     >
       <textarea
         value={input}

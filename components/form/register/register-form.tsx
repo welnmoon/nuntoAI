@@ -23,35 +23,47 @@ const RegisterForm = () => {
   });
 
   const onRegisterSubmit = async () => {
-    const res = await fetch(API_ROUTES.register, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form.getValues() as registerSchemaType),
-    });
-    const data = await res.json();
-    const { email, hashedPassword, fullName } = data;
-    if (!res.ok) {
-      toast.error(data.error);
-      return;
-    }
-    const login = await signIn("credentials", {
-      email,
-      hashedPassword,
-      fullName,
-      redirect: false,
-    });
-    if (login?.error) {
-      toast.error(login.error);
-      return;
-    }
+    try {
+      const payload = form.getValues() as registerSchemaType; // { email, password, fullName, ... }
 
-    toast.success(
-      "Вы успешно зарегистрированы! Пожалуйста, войдите в систему."
-    );
-    router.replace("/");
+      const res = await fetch(API_ROUTES.register, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      // попробуем прочитать тело, но бережно
+      let data: any = null;
+      try {
+        data = await res.json();
+      } catch {}
+
+      if (!res.ok) {
+        // сервер мог вернуть { error: "..." }
+        toast.error(data?.error ?? `Ошибка регистрации (${res.status})`);
+        return;
+      }
+
+      // Успешно зарегистрирован → сразу логиним тем же email/password из формы
+      const login = await signIn("credentials", {
+        email: payload.email,
+        password: payload.password, // ВАЖНО: не hashedPassword!
+        redirect: false,
+      });
+
+      if (login?.error) {
+        toast.error(login.error);
+        return;
+      }
+
+      toast.success("Вы успешно зарегистрированы и вошли в систему!");
+      router.replace("/");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Неизвестная ошибка";
+      toast.error(message);
+    }
   };
+
   return (
     <div className="w-[300px] bg-white p-6 rounded-xl">
       <Heading level={2} className="mb-4">

@@ -9,13 +9,13 @@ import { loginSchema } from "./loginSchema";
 import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
 import { redirect } from "next/navigation";
+import { CLIENT_ROUTES } from "@/lib/client-routes";
 
 const LoginForm = () => {
   const form = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
-      fullName: "",
       password: "",
     },
   });
@@ -24,17 +24,16 @@ const LoginForm = () => {
     const login = await signIn("credentials", {
       email: form.getValues("email"),
       password: form.getValues("password"),
-      fullName: form.getValues("fullName"),
       redirect: false,
     });
 
     if (login?.error) {
       toast.error(login.error);
-      redirect("/");
+
       return;
     } else {
       toast.success("Вы успешно вошли в систему!");
-      redirect("/");
+      redirect(CLIENT_ROUTES.home);
     }
   };
   return (
@@ -47,11 +46,6 @@ const LoginForm = () => {
           onSubmit={form.handleSubmit(onLoginSubmit)}
           className="flex flex-col gap-4"
         >
-          <FormInput
-            name="fullName"
-            label="Полное имя"
-            placeholder="Введите полное имя"
-          />
           <FormInput name="email" label="Email" placeholder="Введите email" />
           <FormInput
             name="password"
