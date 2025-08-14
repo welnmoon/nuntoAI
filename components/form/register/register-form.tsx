@@ -10,6 +10,7 @@ import API_ROUTES from "@/lib/api-routes";
 import toast from "react-hot-toast";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { CLIENT_ROUTES } from "@/lib/client-routes";
 
 const RegisterForm = () => {
   const router = useRouter();
@@ -39,7 +40,6 @@ const RegisterForm = () => {
       } catch {}
 
       if (!res.ok) {
-        // сервер мог вернуть { error: "..." }
         toast.error(data?.error ?? `Ошибка регистрации (${res.status})`);
         return;
       }
@@ -57,7 +57,7 @@ const RegisterForm = () => {
       }
 
       toast.success("Вы успешно зарегистрированы и вошли в систему!");
-      router.replace("/");
+      router.replace(CLIENT_ROUTES.home);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Неизвестная ошибка";
       toast.error(message);

@@ -6,14 +6,16 @@ import { SessionProvider } from "next-auth/react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { GlobalSidebarToggle } from "@/components/global-sidebar-toggle";
-import { Toaster } from "react-hot-toast";
+import { Chat } from "@prisma/client";
 
 export function Providers({
   children,
   session,
+  chats,
 }: {
   children: React.ReactNode;
   session?: Session | null;
+  chats?: Chat[];
 }) {
   return (
     <SessionProvider session={session}>
@@ -21,9 +23,8 @@ export function Providers({
         {/* Глобальная кнопка — всегда в левом верхнем углу */}
         <GlobalSidebarToggle />
 
-        <AppSidebar />
+        <AppSidebar chats={chats}/>
         <SidebarInset>{children}</SidebarInset>
-        
       </SidebarProvider>
     </SessionProvider>
   );

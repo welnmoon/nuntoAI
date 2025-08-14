@@ -49,8 +49,8 @@ model Chat {
   id Int    @id @default(autoincrement())
   title  String
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   visibility Visibility @default(PRIVATE)
   

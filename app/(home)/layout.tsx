@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../globals.css";
 import { Providers } from "@/components/providers/Providers";
 import { getServerSession } from "next-auth";
+import { prisma } from "@/prisma/prisma-client";
 
 export const metadata: Metadata = {
   title: "Nunto AI",
@@ -14,10 +15,13 @@ export default async function HomeLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession();
+  const chats = await prisma.chat.findMany();
   return (
     <html lang="ru">
       <body className={``}>
-        <Providers session={session}>{children}</Providers>
+        <Providers chats={chats} session={session}>
+          {children}
+        </Providers>
       </body>
     </html>
   );

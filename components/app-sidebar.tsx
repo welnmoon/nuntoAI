@@ -19,11 +19,20 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Chat } from "@prisma/client";
+import { usePathname, useRouter } from "next/navigation";
+import { CLIENT_ROUTES } from "@/lib/client-routes";
 
-export function AppSidebar() {
+export function AppSidebar({ chats }: { chats?: Chat[] }) {
   const { data: session } = useSession();
   const { state } = useSidebar(); // "expanded" | "collapsed"
   const isCollapsed = state === "collapsed";
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleChatClick = (chatId: number) => {
+    router.push(`${CLIENT_ROUTES.chat}${chatId}`);
+  };
 
   return (
     <Sidebar collapsible="icon" className="group/sidebar py-4">
@@ -37,24 +46,44 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2">
-        <NavItem
-          href="/chats"
-          icon={<MessagesSquare className="size-4" />}
-          label="Новый чат"
-          collapsed={isCollapsed}
-        />
-        <NavItem
-          href="/search"
-          icon={<Search className="size-4" />}
-          label="Поиск"
-          collapsed={isCollapsed}
-        />
-        <NavItem
-          href="/settings"
-          icon={<Settings className="size-4" />}
-          label="Настройки"
-          collapsed={isCollapsed}
-        />
+        <div>
+          <NavItem
+            href={CLIENT_ROUTES.home}
+            icon={<MessagesSquare className="size-4" />}
+            label="Новый чат"
+            collapsed={isCollapsed}
+          />
+          <NavItem
+            href="/search"
+            icon={<Search className="size-4" />}
+            label="Поиск"
+            collapsed={isCollapsed}
+          />
+          <NavItem
+            href="/settings"
+            icon={<Settings className="size-4" />}
+            label="Настройки"
+            collapsed={isCollapsed}
+          />
+        </div>
+
+        {/*Chats*/}
+        <div>
+          {chats?.map((chat) => {
+            const isActive = pathname.includes(`/chat/${chat.id}`);
+            return (
+              <p
+                className={`${
+                  isActive && "bg-white text-bold"
+                } cursor-pointer px-2 py-1 rounded-md hover:bg-muted transition-colors`}
+                onClick={() => handleChatClick(chat.id)}
+                key={chat.id}
+              >
+                {chat.title}
+              </p>
+            );
+          })}
+        </div>
       </SidebarContent>
 
       <SidebarFooter>
