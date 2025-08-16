@@ -16,9 +16,7 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
   try {
     const { message } = await req.json();
-    console.log("[API/openai] POST request body message:", message);
     if (!message || typeof message !== "string") {
-      console.log("[API/openai] Invalid or missing message");
       return NextResponse.json(
         { error: "Invalid or missing message." },
         { status: 400 }
@@ -31,14 +29,12 @@ export async function POST(req: Request) {
       model: "openai/gpt-4o",
       messages: [{ role: "user", content: message }],
       max_tokens: 1000,
+      stream: true
     });
-    console.log("[API/openai] OpenAI API response:", JSON.stringify(completion));
 
     // Гарантированно получаем строку сообщения ассистента
     const assistantMessage = completion.choices && completion.choices[0] && completion.choices[0].message && completion.choices[0].message.content;
-    console.log("[API/openai] assistantMessage:", assistantMessage);
     if (!assistantMessage || typeof assistantMessage !== "string") {
-      console.log("[API/openai] No valid response from OpenAI API.");
       return NextResponse.json(
         { error: "No valid response from OpenAI API." },
         { status: 500 }
@@ -46,7 +42,6 @@ export async function POST(req: Request) {
     }
 
     const title = message.slice(0, 50) || "New Chat";
-    console.log("[API/openai] Chat title:", title);
 
     if (userId) {
       await prisma.chat.create({
@@ -67,10 +62,8 @@ export async function POST(req: Request) {
           },
         },
       });
-      console.log("[API/openai] Messages written to DB");
     }
 
-    console.log("[API/openai] Ответ возвращён на фронт", { reply: assistantMessage });
     return NextResponse.json({
       reply: assistantMessage,
     });

@@ -4,14 +4,15 @@ import Heading from "@/components/headers/heading";
 import { CLIENT_ROUTES } from "@/lib/client-routes";
 import { useChatStore } from "@/store/chats-store";
 import { Chat, Message, MessageRole } from "@prisma/client";
-import { TvIcon, User } from "lucide-react";
+import { TvIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
+import { BeatLoader } from "react-spinners";
 
 interface Props {
   chat?: Chat;
@@ -43,6 +44,7 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
 
     let currentChat = chat;
     let currentChatId = chat?.id ?? 0;
+    let createdNewChat = false;
 
     // Создаём userMsg всегда
     const userMsg: Message = {
@@ -86,8 +88,7 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
         // Обновляем chatId для сообщений
         userMsg.chatId = currentChatId;
         assistantMsg.chatId = currentChatId;
-        router.push(`${CLIENT_ROUTES.chat}${newChat.id}`);
-        return;
+        createdNewChat = true;
       }
 
       // Отправляем user message в БД
@@ -135,8 +136,13 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
         }
         return arr;
       });
-    } catch (err: any) {
-      toast.error(err.message || "Ошибка отправки сообщения");
+      if (createdNewChat) {
+        router.push(`${CLIENT_ROUTES.chat}${currentChatId}`);
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Ошибка отправки сообщения";
+      toast.error(message);
       // Удаляем ассистент-плейсхолдер
       setMessages((prev) => prev.filter((m) => m.id !== assistantMsg.id));
     } finally {
@@ -169,12 +175,16 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
                                    : " text-gray-800"
                                }`}
               >
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeHighlight]}
-                >
-                  {m.content}
-                </ReactMarkdown>
+                {loading && m.id === messages[messages.length - 1].id ? (
+                  <BeatLoader size={5} />
+                ) : (
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeHighlight]}
+                  >
+                    {m.content}
+                  </ReactMarkdown>
+                )}
               </div>
             </div>
           ))}
