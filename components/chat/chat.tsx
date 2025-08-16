@@ -1,10 +1,12 @@
 "use client";
 import SendToAIForm from "@/components/form/main-form/send-to-ai-form";
 import Heading from "@/components/headers/heading";
+import { CLIENT_ROUTES } from "@/lib/client-routes";
+import { useChatStore } from "@/store/chats-store";
 import { Chat, Message, MessageRole } from "@prisma/client";
 import { TvIcon, User } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useParams } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
@@ -24,8 +26,9 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
   const session = useSession();
   const userName = session.data?.user?.name || "Гость";
   const isAuth = !!session.data?.user;
-  console.log("user id", session.data?.user.id);
-  // Синхронизируем state при смене чата/props
+  const pathName = usePathname();
+  const router = useRouter();
+  const addChat = useChatStore((state) => state.addChat);
   useEffect(() => {
     setMessages(initialMessages);
   }, [initialMessages, chat?.id]);
@@ -38,10 +41,13 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
     e.preventDefault();
     if (!input.trim()) return;
 
+    let currentChat = chat;
+    let currentChatId = chat?.id ?? 0;
+
     // Создаём userMsg всегда
     const userMsg: Message = {
       id: Date.now(),
-      chatId: chat?.id ?? 0,
+      chatId: currentChatId,
       role: MessageRole.USER,
       content: input,
       createdAt: new Date(),
@@ -53,7 +59,7 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
 
     const assistantMsg: Message = {
       id: Date.now() + 1,
-      chatId: chat?.id ?? 0,
+      chatId: currentChatId,
       role: MessageRole.ASSISTANT,
       content: "...",
       createdAt: new Date(),
@@ -61,11 +67,32 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
     };
     setMessages((prev) => [...prev, assistantMsg]);
 
-    // Запрос в API только для авторизованных
-    if (isAuth) {
-      try {
-        // Отправляем user message в БД
-        const resUser = await fetch(`/api/chats/${chat?.id}/messages`, {
+    try {
+      // Если это первое сообщение и пользователь авторизован, создаем чат
+      if (isAuth && !currentChat && pathName.includes(CLIENT_ROUTES.home)) {
+        const createChatRes = await fetch("/api/chats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!createChatRes.ok) {
+          throw new Error("Ошибка при создании чата");
+        }
+
+        const newChat = await createChatRes.json();
+        currentChat = newChat;
+        currentChatId = newChat.id;
+        addChat(newChat);
+        // Обновляем chatId для сообщений
+        userMsg.chatId = currentChatId;
+        assistantMsg.chatId = currentChatId;
+        router.push(`${CLIENT_ROUTES.chat}${newChat.id}`);
+        return;
+      }
+
+      // Отправляем user message в БД
+      if (isAuth && currentChatId !== 0) {
+        const resUser = await fetch(`/api/chats/${currentChatId}/messages`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: userMsg.content, role: "USER" }),
@@ -73,57 +100,47 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
         if (!resUser.ok) {
           throw new Error("Ошибка при отправке сообщения");
         }
-        // Запрашиваем ответ от AI
-        const res = await fetch("/api/openai", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: userMsg.content }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "Ошибка ответа ИИ");
-        }
+      }
+
+      // Запрашиваем ответ от AI
+      const res = await fetch("/api/openai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMsg.content }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Ошибка ответа ИИ");
+      }
+
+      if (isAuth && currentChatId !== 0) {
         // Сохраняем ассистентское сообщение в БД
-        await fetch(`/api/chats/${chat?.id}/messages`, {
+        await fetch(`/api/chats/${currentChatId}/messages`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: data.reply, role: "ASSISTANT" }),
         });
-        // Заменяем локально последний ассистентский ответ
-        setMessages((prev) => {
-          const arr = [...prev];
-          const idx = arr.findIndex((m) => m.id === assistantMsg.id);
-          if (idx !== -1) {
-            arr[idx] = {
-              ...assistantMsg,
-              content: data.reply,
-            };
-          }
-          return arr;
-        });
-      } catch (err: any) {
-        toast.error(err.message || "Ошибка отправки сообщения");
-        // Удаляем ассистент-плейсхолдер
-        setMessages((prev) => prev.filter((m) => m.id !== assistantMsg.id));
-      } finally {
-        setLoading(false);
       }
-    } else {
-      // Гость — только эмулируем ответ AI (минимально)
-      setTimeout(() => {
-        setMessages((prev) => {
-          const arr = [...prev];
-          const idx = arr.findIndex((m) => m.id === assistantMsg.id);
-          if (idx !== -1) {
-            arr[idx] = {
-              ...assistantMsg,
-              content: "[guest mode: ответ AI не доступен]",
-            };
-          }
-          return arr;
-        });
-        setLoading(false);
-      }, 1200);
+
+      // Заменяем локально последний ассистентский ответ
+      setMessages((prev) => {
+        const arr = [...prev];
+        const idx = arr.findIndex((m) => m.id === assistantMsg.id);
+        if (idx !== -1) {
+          arr[idx] = {
+            ...assistantMsg,
+            content: data.reply,
+            chatId: currentChatId,
+          };
+        }
+        return arr;
+      });
+    } catch (err: any) {
+      toast.error(err.message || "Ошибка отправки сообщения");
+      // Удаляем ассистент-плейсхолдер
+      setMessages((prev) => prev.filter((m) => m.id !== assistantMsg.id));
+    } finally {
+      setLoading(false);
     }
   };
 

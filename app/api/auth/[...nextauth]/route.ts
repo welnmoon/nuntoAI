@@ -1,11 +1,15 @@
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 
 import { prisma } from "@/prisma/prisma-client";
 import { compare } from "bcryptjs";
+import { JWT } from "next-auth/jwt";
+import { Session, User, AuthOptions, SessionStrategy } from "next-auth";
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID || "",
@@ -64,23 +68,24 @@ const handler = NextAuth({
     strategy: "jwt", // для чего? Можно ли выбрать что то другое или это лучше?
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.name = user.name; // или user.fullName
-        token.email = user.email;
+    async jwt({ token, user }: { token: JWT; user?: User }) {
+      if (user) token.id = user.id;
+
+      if (!token.id && token.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: token.email },
+        });
+        token.id = dbUser?.id;
       }
       return token;
     },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = String(token.id);
-        session.user.name = token.name;
-        session.user.email = token.email;
-      }
+    async session({ session, token }: { session: Session; token: JWT }) {
+      if (token?.id) session.user.id = token.id as string;
       return session;
     },
   },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

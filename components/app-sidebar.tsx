@@ -22,6 +22,8 @@ import { cn } from "@/lib/utils";
 import { Chat } from "@prisma/client";
 import { usePathname, useRouter } from "next/navigation";
 import { CLIENT_ROUTES } from "@/lib/client-routes";
+import { useChatStore } from "@/store/chats-store";
+import { useEffect } from "react";
 
 export function AppSidebar({ chats }: { chats?: Chat[] }) {
   const { data: session } = useSession();
@@ -29,6 +31,14 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
   const isCollapsed = state === "collapsed";
   const pathname = usePathname();
   const router = useRouter();
+  const setChats = useChatStore((state) => state.setChats);
+  const chatsFromStore = useChatStore((state) => state.chats);
+
+  useEffect(() => {
+    if (chats) {
+      setChats(chats);
+    }
+  }, [chats]);
 
   const handleChatClick = (chatId: number) => {
     router.push(`${CLIENT_ROUTES.chat}${chatId}`);
@@ -69,7 +79,7 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
 
         {/*Chats*/}
         <div>
-          {chats?.map((chat) => {
+          {chatsFromStore?.map((chat) => {
             const isActive = pathname.includes(`/chat/${chat.id}`);
             return (
               <p
@@ -79,7 +89,7 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
                 onClick={() => handleChatClick(chat.id)}
                 key={chat.id}
               >
-                {chat.title}
+                {chat.title + " " + chat.id}
               </p>
             );
           })}
@@ -87,7 +97,10 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex items-center gap-2">
+        <div
+          onClick={() => router.push(CLIENT_ROUTES.profile)}
+          className="flex items-center gap-2"
+        >
           <UserCircle className="size-7 shrink-0" />
 
           <span
