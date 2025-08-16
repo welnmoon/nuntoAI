@@ -29,43 +29,32 @@ export async function POST(req: Request) {
       model: "openai/gpt-4o",
       messages: [{ role: "user", content: message }],
       max_tokens: 1000,
-      stream: true
+      stream: true,
     });
 
-    // Гарантированно получаем строку сообщения ассистента
-    const assistantMessage = completion.choices && completion.choices[0] && completion.choices[0].message && completion.choices[0].message.content;
-    if (!assistantMessage || typeof assistantMessage !== "string") {
-      return NextResponse.json(
-        { error: "No valid response from OpenAI API." },
-        { status: 500 }
-      );
-    }
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const part of completion) {
+            const text = part.choices[0]?.delta?.content || "";
 
-    const title = message.slice(0, 50) || "New Chat";
+            if (text) {
+              controller.enqueue(encoder.encode(text));
+            }
+          }
+        } catch (err) {
+          controller.error(err);
+        } finally {
+          controller.close();
+        }
+      },
+    });
 
-    if (userId) {
-      await prisma.chat.create({
-        data: {
-          title,
-          userId,
-          messages: {
-            create: [
-              {
-                role: MessageRole.USER,
-                content: message,
-              },
-              {
-                role: MessageRole.ASSISTANT,
-                content: assistantMessage,
-              },
-            ],
-          },
-        },
-      });
-    }
-
-    return NextResponse.json({
-      reply: assistantMessage,
+    return NextResponse.json(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8", // до этого был reply. Что это?
+      },
     });
   } catch (error) {
     console.error("❌ OpenAI API error:", error);

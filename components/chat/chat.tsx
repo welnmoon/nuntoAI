@@ -103,15 +103,38 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
         }
       }
 
-      // Запрашиваем ответ от AI
+      // Запрашиваем ответ от AI [Streaming]
       const res = await fetch("/api/openai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMsg.content }),
       });
       const data = await res.json();
-      if (!res.ok) {
+      if (!res.ok && !res.body) {
+        const data = await res.json().catch(() => ({ error: "" }));
         throw new Error(data.error || "Ошибка ответа ИИ");
+      }
+
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let fullReply = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        const chunkValue = decoder.decode(value, { stream: true });
+        fullReply += chunkValue;
+        setMessages((prev) => {
+          const arr = [...prev];
+          const idx = arr.findIndex((m) => m.id === assistantMsg.id);
+          if (idx !== -1) {
+            arr[idx] = {
+              ...assistantMsg,
+              content: fullReply,
+              chatId: currentChatId,
+            };
+          }
+          return arr;
+        });
       }
 
       if (isAuth && currentChatId !== 0) {
@@ -119,7 +142,7 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
         await fetch(`/api/chats/${currentChatId}/messages`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: data.reply, role: "ASSISTANT" }),
+          body: JSON.stringify({ content: fullReply, role: "ASSISTANT" }),
         });
       }
 
