@@ -51,9 +51,9 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(stream, {
+    return new NextResponse(stream, {
       headers: {
-        "Content-Type": "text/plain; charset=utf-8", // до этого был reply. Что это?
+        "Content-Type": "application/octet-stream; charset=utf-8", // до этого был reply. Что это?
       },
     });
   } catch (error) {

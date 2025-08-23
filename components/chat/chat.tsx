@@ -30,9 +30,21 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
   const pathName = usePathname();
   const router = useRouter();
   const addChat = useChatStore((state) => state.addChat);
+  const addPendingMessage = useChatStore((state) => state.addPendingMessage);
+  const clearPendingMessages = useChatStore(
+    (state) => state.clearPendingMessages
+  );
+  const chatId = chat?.id;
+  const pendingMessages = useChatStore((state) =>
+    chatId ? state.pendingMessages[chatId] ?? [] : []
+  );
+  // сбрасываем черновики, когда загружаются настоящие сообщения для чата
   useEffect(() => {
     setMessages(initialMessages);
-  }, [initialMessages, chat?.id]);
+    if (chat?.id) {
+      clearPendingMessages(chat.id);
+    }
+  }, [initialMessages, chat?.id, clearPendingMessages]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -72,6 +84,7 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
     try {
       // Если это первое сообщение и пользователь авторизован, создаем чат
       if (isAuth && !currentChat && pathName.includes(CLIENT_ROUTES.home)) {
+        // Создание чата
         const createChatRes = await fetch("/api/chats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -89,9 +102,88 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
         userMsg.chatId = currentChatId;
         assistantMsg.chatId = currentChatId;
         createdNewChat = true;
+
+        // ДОБАВИТЬ ВРЕМЕННЫЕ СООБЩЕНИЯ (optimistic UI)
+        addPendingMessage(currentChatId, userMsg);
+        addPendingMessage(currentChatId, assistantMsg);
+
+        // Переход на страницу нового чата МГНОВЕННО
+        router.push(`${CLIENT_ROUTES.chat}${currentChatId}`);
+
+        // Запускаем отправку сообщений и AI-флоу в фоне,
+        // чтобы пользователь уже перешёл, а обработка шла дальше
+        (async () => {
+          try {
+            // Отправляем user message в БД
+            await fetch(`/api/chats/${currentChatId}/messages`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ content: userMsg.content, role: "USER" }),
+            });
+
+            // Запрашиваем ответ от AI [Streaming]
+            const res = await fetch("/api/openai", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message: userMsg.content }),
+            });
+
+            if (!res.body) return;
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let fullReply = "";
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              const chunkValue = decoder.decode(value, { stream: true });
+              fullReply += chunkValue;
+              setMessages((prev) => {
+                const arr = [...prev];
+                const idx = arr.findIndex((m) => m.id === assistantMsg.id);
+                if (idx !== -1) {
+                  arr[idx] = {
+                    ...assistantMsg,
+                    content: fullReply,
+                    chatId: currentChatId,
+                  };
+                }
+                return arr;
+              });
+            }
+
+            // Сохраняем ассистентское сообщение в БД
+            if (isAuth && currentChatId !== 0) {
+              await fetch(`/api/chats/${currentChatId}/messages`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: fullReply, role: "ASSISTANT" }),
+              });
+            }
+
+            setMessages((prev) => {
+              const arr = [...prev];
+              const idx = arr.findIndex((m) => m.id === assistantMsg.id);
+              if (idx !== -1) {
+                arr[idx] = {
+                  ...assistantMsg,
+                  content: fullReply,
+                  chatId: currentChatId,
+                };
+              }
+              return arr;
+            });
+          } catch (err) {
+            setMessages((prev) => prev.filter((m) => m.id !== assistantMsg.id));
+          } finally {
+            setLoading(false);
+          }
+        })();
+
+        // return сразу — не выполняем дальнейшую логику, для этого случая уже всё запущено
+        return;
       }
 
-      // Отправляем user message в БД
+      // СТАРЫЙ ФЛОУ: если чат уже существует, логика остаётся прежней
       if (isAuth && currentChatId !== 0) {
         const resUser = await fetch(`/api/chats/${currentChatId}/messages`, {
           method: "POST",
@@ -103,19 +195,14 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
         }
       }
 
-      // Запрашиваем ответ от AI [Streaming]
       const res = await fetch("/api/openai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMsg.content }),
       });
-      const data = await res.json();
-      if (!res.ok && !res.body) {
-        const data = await res.json().catch(() => ({ error: "" }));
-        throw new Error(data.error || "Ошибка ответа ИИ");
-      }
+      if (!res.body) return;
 
-      const reader = res.body!.getReader();
+      const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let fullReply = "";
       while (true) {
@@ -138,7 +225,6 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
       }
 
       if (isAuth && currentChatId !== 0) {
-        // Сохраняем ассистентское сообщение в БД
         await fetch(`/api/chats/${currentChatId}/messages`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -146,27 +232,22 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
         });
       }
 
-      // Заменяем локально последний ассистентский ответ
       setMessages((prev) => {
         const arr = [...prev];
         const idx = arr.findIndex((m) => m.id === assistantMsg.id);
         if (idx !== -1) {
           arr[idx] = {
             ...assistantMsg,
-            content: data.reply,
+            content: fullReply,
             chatId: currentChatId,
           };
         }
         return arr;
       });
-      if (createdNewChat) {
-        router.push(`${CLIENT_ROUTES.chat}${currentChatId}`);
-      }
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Ошибка отправки сообщения";
       toast.error(message);
-      // Удаляем ассистент-плейсхолдер
       setMessages((prev) => prev.filter((m) => m.id !== assistantMsg.id));
     } finally {
       setLoading(false);
@@ -177,7 +258,7 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
     <main className="min-h-screen flex flex-col w-1/2 max-w-1/2 mx-auto">
       {messages.length > 0 ? (
         <section className="flex-1 overflow-y-auto px-4 py-6">
-          {messages.map((m, i) => (
+          {[...messages, ...pendingMessages].map((m, i) => (
             <div
               key={m.id || i}
               className={`mb-4 flex  ${
@@ -192,13 +273,13 @@ const ChatComponent = ({ chat, messages: initialMessages }: Props) => {
 
               <div
                 className={`max-w-[80%] px-4 py-2 rounded shadow prose max-w-none
-                               ${
-                                 m.role === MessageRole.USER
-                                   ? "bg-gray-100 text-gray-800"
-                                   : " text-gray-800"
-                               }`}
+          ${
+            m.role === MessageRole.USER
+              ? "bg-gray-100 text-gray-800"
+              : " text-gray-800"
+          }`}
               >
-                {loading && m.id === messages[messages.length - 1].id ? (
+                {loading && m.id === messages[messages.length - 1]?.id ? (
                   <BeatLoader size={5} />
                 ) : (
                   <ReactMarkdown

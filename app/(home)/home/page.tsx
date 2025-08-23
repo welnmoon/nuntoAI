@@ -1,9 +1,5 @@
 import { getServerSession } from "next-auth";
-import { prisma } from "@/prisma/prisma-client";
 import ChatComponent from "@/components/chat/chat";
-import { Visibility, MessageRole } from "@prisma/client";
-import { redirect } from "next/navigation";
-import { CLIENT_ROUTES } from "@/lib/client-routes";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export default async function HomePage() {

@@ -23,9 +23,11 @@ import { Chat } from "@prisma/client";
 import { usePathname, useRouter } from "next/navigation";
 import { CLIENT_ROUTES } from "@/lib/client-routes";
 import { useChatStore } from "@/store/chats-store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import ProfileModal from "./profile/profile-modal";
 
 export function AppSidebar({ chats }: { chats?: Chat[] }) {
+  const [openModal, setOpenModal] = useState(false);
   const { data: session } = useSession();
   const { state } = useSidebar(); // "expanded" | "collapsed"
   const isCollapsed = state === "collapsed";
@@ -69,37 +71,46 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
             label="Поиск"
             collapsed={isCollapsed}
           />
-          <NavItem
-            href="/settings"
-            icon={<Settings className="size-4" />}
-            label="Настройки"
-            collapsed={isCollapsed}
-          />
         </div>
 
         {/*Chats*/}
         <div>
-          {chatsFromStore?.map((chat) => {
-            const isActive = pathname.includes(`/chat/${chat.id}`);
-            return (
-              <p
-                className={`${
-                  isActive && "bg-white text-bold"
-                } cursor-pointer px-2 py-1 rounded-md hover:bg-muted transition-colors`}
-                onClick={() => handleChatClick(chat.id)}
-                key={chat.id}
-              >
-                {chat.title + " " + chat.id}
-              </p>
-            );
-          })}
+          {chatsFromStore
+            ?.sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+            )
+            .map((chat, i) => {
+              const isActive = pathname.includes(`/chat/${chat.id}`);
+              return (
+                <p
+                  key={chat.id}
+                  onClick={() => handleChatClick(chat.id)}
+                  className={`${
+                    isActive && "bg-white text-bold"
+                  } cursor-pointer px-2 py-1 rounded-md hover:bg-muted transition-colors shrink-0 overflow-hidden`} // важно: overflow-hidden
+                >
+                  <span
+                    className={`block min-w-0 truncate will-change-transform transition-all ease-out
+            ${
+              isCollapsed
+                ? "opacity-0 -translate-x-2 pointer-events-none"
+                : `opacity-100 translate-x-0 duration-300 delay-[${i * 40}ms]`
+            }`}
+                  >
+                    {chat.title + " " + chat.id}
+                  </span>
+                </p>
+              );
+            })}
         </div>
       </SidebarContent>
 
       <SidebarFooter>
         <div
-          onClick={() => router.push(CLIENT_ROUTES.profile)}
-          className="flex items-center gap-2"
+          onClick={() => setOpenModal(true)}
+          className="flex items-center gap-2 cursor-pointer px-2 py-1 hover:bg-muted rounded-md transition-colors"
         >
           <UserCircle className="size-7 shrink-0" />
 
@@ -113,6 +124,12 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
           </span>
         </div>
       </SidebarFooter>
+
+      <ProfileModal
+        session={session}
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+      />
 
       <SidebarRail />
     </Sidebar>

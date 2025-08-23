@@ -2,19 +2,24 @@ import { Chat } from "@prisma/client";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+import { Message } from "@prisma/client";
+
 interface State {
   chats: Chat[];
   addChat: (chat: Chat) => void;
   setChats: (chats: Chat[]) => void;
   removeChat: (chatId: number) => void;
   updateChatName: (chatId: number, name: string) => void;
+  pendingMessages: Record<number, Message[]>;
+  addPendingMessage: (chatId: number, msg: Message) => void;
+  clearPendingMessages: (chatId: number) => void;
 }
 
 export const useChatStore = create<State>()(
   persist(
     (set, get) => ({
       chats: [],
-
+      pendingMessages: {},
       addChat: (chat: Chat) =>
         set((state) => ({
           chats: [...state.chats, chat],
@@ -30,6 +35,19 @@ export const useChatStore = create<State>()(
             chat.id === chatId ? { ...chat, name } : chat
           ),
         })),
+      addPendingMessage: (chatId: number, msg: Message) =>
+        set((state) => ({
+          pendingMessages: {
+            ...state.pendingMessages,
+            [chatId]: [...(state.pendingMessages[chatId] || []), msg],
+          },
+        })),
+      clearPendingMessages: (chatId: number) =>
+        set((state) => {
+          const copy = { ...state.pendingMessages };
+          delete copy[chatId];
+          return { pendingMessages: copy };
+        }),
     }),
     {
       name: "chats-store",
