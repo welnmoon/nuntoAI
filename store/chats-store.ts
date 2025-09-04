@@ -13,6 +13,8 @@ interface State {
   pendingMessages: Record<number, Message[]>;
   addPendingMessage: (chatId: number, msg: Message) => void;
   clearPendingMessages: (chatId: number) => void;
+
+  updateChatTitle: (chatId: number, title: string) => void;
 }
 
 export const useChatStore = create<State>()(
@@ -48,6 +50,10 @@ export const useChatStore = create<State>()(
           delete copy[chatId];
           return { pendingMessages: copy };
         }),
+        updateChatTitle: (chatId: number, title: string) => 
+          set((state)=>({
+            chats: state.chats.map((chat)=>chat.id===chatId ? {...chat, title}: chat)
+          }))
     }),
     {
       name: "chats-store",

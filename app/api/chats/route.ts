@@ -7,16 +7,13 @@ import { Visibility } from "@prisma/client";
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Не авторизован" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
     }
 
     const userId = Number(session.user.id);
-    
+
     // Проверяем существование пользователя
     const dbUser = await prisma.user.findUnique({
       where: { id: userId },
@@ -29,10 +26,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const lastChat = await prisma.chat.findFirst({
+      orderBy: {
+        id: "desc",
+      },
+    });
+
     // Создаем новый чат
     const chat = await prisma.chat.create({
       data: {
-        title: "Новый чат",
+        title: "Новый чат" + (lastChat?.id! + 1 || 1),
         user: {
           connect: {
             id: userId,
@@ -46,9 +49,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(chat);
   } catch (error) {
     console.error("Ошибка при создании чата:", error);
-    return NextResponse.json(
-      { error: "Ошибка сервера" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }
 }

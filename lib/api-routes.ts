@@ -5,6 +5,7 @@ const API_ROUTES = {
   chats: {
     create: "/api/chats",
     importGuest: "/api/chats/import",
+    delete: "/api/chats/", // + chatId
   },
 };
 

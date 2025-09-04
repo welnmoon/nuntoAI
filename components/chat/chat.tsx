@@ -35,7 +35,6 @@ export default function ChatComponent({
   const isAuth = !!session?.user;
 
   const pathName = usePathname();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const isTemporary = searchParams.get("temporary") === "true";
   const setQuery = useQuerySetter();
@@ -100,8 +99,6 @@ export default function ChatComponent({
       if (isTemporary) {
         userMsg.chatId = TEMP_CHAT_ID;
         assistantMsg.chatId = TEMP_CHAT_ID;
-
-
 
         // только стрим из AI
         const res = await fetch("/api/openai", {
@@ -236,7 +233,7 @@ export default function ChatComponent({
       setLoading(false);
     }
   };
- 
+
   return (
     <main className="min-h-screen flex flex-col w-1/2 max-w-1/2 mx-auto">
       {messages.length > 0 ? (
@@ -278,14 +275,18 @@ export default function ChatComponent({
       )}
 
       {/* Тогглер «временного» режима — просто ставим параметр query */}
-      <MessageCircleIcon
-        className={`cursor-pointer absolute top-5 right-5 ${
-          isTemporary ? "text-blue-500" : "text-black"
-        } size-6`}
-        onClick={() =>
-          setQuery("temporary", isTemporary ? null : "true", { replace: true })
-        }
-      />
+      {!chatId && (
+        <MessageCircleIcon
+          className={`cursor-pointer absolute top-5 right-5 ${
+            isTemporary ? "text-blue-500" : "text-black"
+          } size-6`}
+          onClick={() =>
+            setQuery("temporary", isTemporary ? null : "true", {
+              replace: true,
+            })
+          }
+        />
+      )}
     </main>
   );
 }

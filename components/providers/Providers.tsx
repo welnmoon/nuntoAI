@@ -4,7 +4,7 @@
 import { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { GlobalSidebarToggle } from "@/components/global-sidebar-toggle";
 import { Chat } from "@prisma/client";
 
@@ -23,7 +23,7 @@ export function Providers({
         {/* Глобальная кнопка — всегда в левом верхнем углу */}
         <GlobalSidebarToggle />
 
-        <AppSidebar chats={chats}/>
+        <AppSidebar chats={chats} />
         <SidebarInset>{children}</SidebarInset>
       </SidebarProvider>
     </SessionProvider>
