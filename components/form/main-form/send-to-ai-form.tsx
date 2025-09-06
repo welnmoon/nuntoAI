@@ -40,6 +40,12 @@ const SendToAIForm = ({
       } ${isFormDisabled ? "opacity-50" : ""}`}
     >
       <textarea
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSubmit!(e as unknown as React.FormEvent<HTMLFormElement>);
+          }
+        }}
         value={input}
         onChange={(e) => setInput!(e.target.value)}
         placeholder="Введите сообщение для ИИ..."

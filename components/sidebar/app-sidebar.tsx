@@ -90,8 +90,8 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
             {pinnedChats
               ?.sort(
                 (a, b) =>
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime()
+                  new Date(b.updatedAt).getTime() -
+                  new Date(a.updatedAt).getTime()
               )
               .map((chat, i) => (
                 <AppSidebarPopover
@@ -117,8 +117,8 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
             {justChats
               ?.sort(
                 (a, b) =>
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime()
+                  new Date(b.updatedAt).getTime() -
+                  new Date(a.updatedAt).getTime()
               )
               .map((chat, i) => (
                 <AppSidebarPopover

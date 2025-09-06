@@ -12,6 +12,7 @@ import { Ellipsis } from "lucide-react";
 import { useState, useCallback } from "react";
 import { useSidebarChatActions } from "@/hooks/use-sidebar-chat-actions";
 import { usePathname } from "next/navigation";
+import { ShareToggle } from "../share-toggle";
 
 interface Props {
   chat: Chat;
@@ -143,6 +144,17 @@ const AppSidebarPopover = ({ chat, isCollapsed, index }: Props) => {
           >
             Удалить
           </button>
+          <button
+            onClick={() => {}}
+            className="text-left px-2 py-1 rounded hover:bg-muted text-red-600"
+          >
+            Поделиться
+          </button>
+          <ShareToggle
+            chatId={chat.id}
+            isShared={chat.visibility === "SHARED"}
+            publicId={chat.publicId ?? undefined}
+          />
         </div>
       </PopoverContent>
     </Popover>
