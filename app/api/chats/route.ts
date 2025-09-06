@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/prisma/prisma-client";
 import { Visibility } from "@prisma/client";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -26,16 +26,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const lastChat = await prisma.chat.findFirst({
-      orderBy: {
-        id: "desc",
-      },
-    });
+    // Посчитаем количество чатов у пользователя, чтобы дать понятный порядковый номер
+    const userChatsCount = await prisma.chat.count({ where: { userId } });
 
     // Создаем новый чат
     const chat = await prisma.chat.create({
       data: {
-        title: "Новый чат" + (lastChat?.id! + 1 || 1),
+        // Базовое название: "Новый чат N" (нумерация внутри пользователя)
+        title: `Новый чат ${userChatsCount + 1}`,
         user: {
           connect: {
             id: userId,

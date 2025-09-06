@@ -3,6 +3,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+:root[data-accent="yellow"] {
+  --accent: #f59e0b;
+}
+:root[data-accent="blue"] {
+  --accent: #3b82f6;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

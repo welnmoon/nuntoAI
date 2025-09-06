@@ -1,6 +1,7 @@
 "use client";
 import { Forward, LoaderCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 
 interface Props {
   handleSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -18,6 +19,18 @@ const SendToAIForm = ({
   width,
 }: Props) => {
   const missingHandlers = !handleSubmit || !setInput || input === undefined;
+  const toastIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (loading) {
+      if (!toastIdRef.current) {
+        toastIdRef.current = toast.loading("Отвечаем...");
+      }
+    } else if (toastIdRef.current) {
+      toast.dismiss(toastIdRef.current);
+      toastIdRef.current = null;
+    }
+  }, [loading]);
   const isFormDisabled = missingHandlers;
   return (
     <form
@@ -39,6 +52,7 @@ const SendToAIForm = ({
         disabled={loading}
         className="bg-black text-white px-2 py-2 rounded-full hover:bg-gray-900 cursor-pointer disabled:opacity-50 
         absolute bottom-5 right-3"
+        style={{ backgroundColor: "var(--accent)" }}
       >
         {loading ? (
           <LoaderCircle size={18} className="animate-spin" />

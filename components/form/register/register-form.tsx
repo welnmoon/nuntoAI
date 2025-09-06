@@ -34,20 +34,24 @@ const RegisterForm = () => {
       });
 
       // попробуем прочитать тело, но бережно
-      let data: any = null;
+      let data: unknown = null;
       try {
         data = await res.json();
       } catch {}
 
       if (!res.ok) {
-        toast.error(data?.error ?? `Ошибка регистрации (${res.status})`);
+        const msg =
+          data && typeof data === "object" && data !== null && "error" in data
+            ? (data as { error?: string }).error || undefined
+            : undefined;
+        toast.error(msg ?? `Ошибка регистрации (${res.status})`);
         return;
       }
 
       // Успешно зарегистрирован → сразу логиним тем же email/password из формы
       const login = await signIn("credentials", {
         email: payload.email,
-        password: payload.password, // ВАЖНО: не hashedPassword!
+        password: payload.password, 
         redirect: false,
       });
 

@@ -6,7 +6,7 @@ import { CLIENT_ROUTES } from "@/lib/client-routes";
 import { useChatStore } from "@/store/chats-store";
 import { Chat, Message, MessageRole } from "@prisma/client";
 import { useSession } from "next-auth/react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import ChatMessages from "./chat-messages";
@@ -30,6 +30,7 @@ export default function ChatComponent({
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const controllerRef = useRef<AbortController | null>(null);
   const { data: session } = useSession();
   const userName = session?.user?.name || "Гость";
   const isAuth = !!session?.user;
@@ -62,6 +63,15 @@ export default function ChatComponent({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // При размонтировании или смене чата отменяем активный стрим,
+  // чтобы избежать утечек и setState послеUnmount
+  useEffect(() => {
+    return () => {
+      controllerRef.current?.abort();
+      controllerRef.current = null;
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -92,10 +102,14 @@ export default function ChatComponent({
     setLoading(true);
 
     try {
+      // отменим предыдущий стрим, если он вдруг остался
+      controllerRef.current?.abort();
+      controllerRef.current = new AbortController();
+      const signal = controllerRef.current.signal;
       /** =========================
        *  ВЕТКА ВРЕМЕННОГО ЧАТА
        *  НИКАКИХ запросов в БД
-       * ========================= */
+       * ========================= **/
       if (isTemporary) {
         userMsg.chatId = TEMP_CHAT_ID;
         assistantMsg.chatId = TEMP_CHAT_ID;
@@ -105,6 +119,7 @@ export default function ChatComponent({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: userMsg.content }),
+          signal,
         });
         if (!res.body) return;
 
@@ -148,7 +163,7 @@ export default function ChatComponent({
             headers: { "Content-Type": "application/json" },
           });
           if (!createChatRes.ok) throw new Error("Ошибка при создании чата");
-        } catch (error) {
+        } catch {
           toast.error(
             "Не удалось создать чат. Пожалуйста, попробуйте ещё раз."
           );
@@ -184,11 +199,11 @@ export default function ChatComponent({
         if (!resUser.ok) throw new Error("Ошибка при отправке сообщения");
       }
 
-      // Получаем ответ AI (stream)
       const res = await fetch("/api/openai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMsg.content }),
+        signal,
       });
       if (!res.body) return;
 
@@ -231,11 +246,13 @@ export default function ChatComponent({
       setMessages((prev) => prev.filter((m) => m.id !== assistantMsg.id));
     } finally {
       setLoading(false);
+      // если стрим успешно закончился — очищаем контроллер
+      controllerRef.current = null;
     }
   };
 
   return (
-    <main className="min-h-screen flex flex-col w-1/2 max-w-1/2 mx-auto">
+    <main className="min-h-screen flex flex-col w-[90%] md:w-1/2 max-w-[700px] mx-auto">
       {messages.length > 0 ? (
         <ChatMessages
           messages={messages}

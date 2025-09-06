@@ -1,6 +1,3 @@
-import { prisma } from "@/prisma/prisma-client";
-import { MessageRole } from "@prisma/client";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -23,7 +20,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const userId = Number((await getServerSession())?.user.id);
+    // При необходимости можно получить userId через getServerSession
 
     const completion = await openai.chat.completions.create({
       model: "openai/gpt-4o",

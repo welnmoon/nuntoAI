@@ -50,10 +50,12 @@ export const useChatStore = create<State>()(
           delete copy[chatId];
           return { pendingMessages: copy };
         }),
-        updateChatTitle: (chatId: number, title: string) => 
-          set((state)=>({
-            chats: state.chats.map((chat)=>chat.id===chatId ? {...chat, title}: chat)
-          }))
+      updateChatTitle: (chatId: number, title: string) =>
+        set((state) => ({
+          chats: state.chats.map((chat) =>
+            chat.id === chatId ? { ...chat, title } : chat
+          ),
+        })),
     }),
     {
       name: "chats-store",

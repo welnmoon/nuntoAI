@@ -4,15 +4,8 @@
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogOverlay,
-  DialogPortal,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
+
 import { Session } from "next-auth";
 import { Settings, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,10 +14,12 @@ export default function ProfileModal({
   openModal,
   setOpenModal,
   session,
+  setSettingsModalOpen,
 }: {
   openModal: boolean;
   setOpenModal: (open: boolean) => void;
   session: Session | null;
+  setSettingsModalOpen: (open: boolean) => void;
 }) {
   const { status } = useSession();
   const router = useRouter();
@@ -44,6 +39,7 @@ export default function ProfileModal({
       <DialogPortal>
         <DialogOverlay className="fixed inset-0 bg-transparent" />
         <DialogContent
+          aria-label="User Profile Modal"
           showCloseButton={false}
           className="
       top-auto bottom-15 left-32
@@ -52,23 +48,26 @@ export default function ProfileModal({
     "
         >
           <div className="justify-center flex flex-col gap-2">
-            <p className="flex gap-2 items-center">
-              <UserCircle color="gray" className="size-4 " />
+            <p className="flex gap-2 items-center px-2 py-1">
+              <UserCircle className="size-4 text-gray-500" />
 
               <span
                 className={cn(
-                  "min-w-0 truncate transition-opacity duration-200 color-gray-600"
+                  "min-w-0 truncate transition-opacity duration-200 text-gray-500"
                 )}
               >
                 {session?.user?.email || "Гость"}
               </span>
             </p>
-            <p className="flex gap-2 items-center">
+            <p
+              onClick={() => setSettingsModalOpen(true)}
+              className="flex gap-2 items-center cursor-pointer hover:bg-gray-100 px-2 py-1 rounded-md transition-colors duration-200"
+            >
               <Settings color="gray" className="size-4" />
 
               <span
                 className={cn(
-                  "min-w-0 truncate transition-opacity duration-200"
+                  "min-w-0 truncate transition-opacity duration-200 "
                 )}
               >
                 Настройки

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Popover,
   PopoverContent,
@@ -7,68 +9,51 @@ import { cn } from "@/lib/utils";
 import { usePinnedChatsStore } from "@/store/pinned-chats-store";
 import { Chat } from "@prisma/client";
 import { Ellipsis } from "lucide-react";
-import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
+import { useState, useCallback } from "react";
+import { useSidebarChatActions } from "@/hooks/use-sidebar-chat-actions";
+import { usePathname } from "next/navigation";
 
 interface Props {
   chat: Chat;
-  isOpen: boolean;
-  setOpenForChatId: Dispatch<SetStateAction<number | null>>;
-  editingChatId: number;
-  handleChatClick: (chatId: number) => void;
-  setHoveredChatId: Dispatch<SetStateAction<number | null>>;
-  isActive: boolean;
   isCollapsed: boolean;
-  editingChatTitle: string;
-  handleChatTitleChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  commitTitle: () => Promise<void>;
-  cancelEditChatTitle: () => void;
-  hoveredChatId: number;
-  setEditingChatId: Dispatch<SetStateAction<number | null>>;
-  chatTitleSending: boolean;
-  onDeleteChat: (chatId: number) => void;
-  togglePinnedChat: (chat: Chat) => void;
   index: number;
 }
 
-const AppSidebarPopover = ({
-  chat,
-  isOpen,
-  setOpenForChatId,
-  editingChatId,
-  handleChatClick,
-  setHoveredChatId,
-  isActive,
-  isCollapsed,
-  editingChatTitle,
-  handleChatTitleChange,
-  commitTitle,
-  cancelEditChatTitle,
-  hoveredChatId,
-  setEditingChatId,
-  chatTitleSending,
-  togglePinnedChat,
-  onDeleteChat,
-  index,
-}: Props) => {
+const AppSidebarPopover = ({ chat, isCollapsed, index }: Props) => {
   const pinnedChats = usePinnedChatsStore((s) => s.pinnedChats);
-  const [isPinned, setIsPinned] = useState(
-    pinnedChats.some((pch) => pch.id === chat.id)
-  );
+  const isPinned = pinnedChats.some((pch) => pch.id === chat.id);
+  const { openChat, renameChat, deleteChat, togglePinnedChat } =
+    useSidebarChatActions();
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState("");
+  const [sending, setSending] = useState(false);
+  const pathname = usePathname();
+  const isActive = pathname === `/home/chat/${chat.id}`;
+
+  const startEdit = useCallback(() => {
+    setTitle(chat.title);
+    setEditing(true);
+  }, [chat.title]);
+
+  const commit = useCallback(async () => {
+    if (!editing) return;
+    setSending(true);
+    try {
+      const ok = await renameChat(chat.id, title);
+      if (ok) setEditing(false);
+    } finally {
+      setSending(false);
+    }
+  }, [editing, renameChat, chat.id, title]);
 
   return (
-    <Popover
-      key={chat.id}
-      open={isOpen}
-      onOpenChange={(open) => setOpenForChatId(open ? chat.id : null)}
-    >
+    <Popover key={chat.id}>
       <p
         onClick={() => {
-          if (editingChatId !== chat.id) handleChatClick(chat.id);
+          if (!editing) openChat(chat.id);
         }}
-        onMouseEnter={() => setHoveredChatId(chat.id)}
-        onMouseLeave={() => setHoveredChatId(null)}
         className={cn(
-          "flex items-center gap-2 px-2 py-1 rounded-md hover:bg-muted transition-colors shrink-0 overflow-hidden",
+          "group/chat flex items-center gap-2 px-2 py-1 rounded-md hover:bg-muted transition-colors shrink-0 overflow-hidden",
           isActive && "bg-white font-semibold"
         )}
       >
@@ -81,33 +66,33 @@ const AppSidebarPopover = ({
           )}
           style={{ transitionDelay: `${index * 40}ms` }}
         >
-          {editingChatId === chat.id ? (
+          {editing ? (
             <input
               autoFocus
               className="w-full min-w-0 bg-transparent outline-none border border-transparent focus:border-muted rounded px-1 py-0.5"
-              value={editingChatTitle}
-              onChange={handleChatTitleChange}
+              value={title}
+              onChange={(e) => setTitle(e.currentTarget.value)}
               onFocus={(e) => e.currentTarget.select()}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  void commitTitle();
+                  void commit();
                   e.currentTarget.blur();
                 }
                 if (e.key === "Escape") {
                   e.preventDefault();
-                  cancelEditChatTitle();
+                  setEditing(false);
                 }
               }}
               onBlur={() => {
-                const trimmed = editingChatTitle.trim();
+                const trimmed = title.trim();
                 if (trimmed.length === 0) {
-                  cancelEditChatTitle();
+                  setEditing(false);
                 } else {
-                  void commitTitle();
+                  void commit();
                 }
               }}
-              disabled={chatTitleSending}
+              disabled={sending}
             />
           ) : (
             <p>{chat.title}</p>
@@ -116,21 +101,18 @@ const AppSidebarPopover = ({
 
         <div className="ml-auto w-7 h-7 grid place-items-center">
           <PopoverTrigger asChild>
-            <button
-              type="button"
+            <span
               className={cn(
-                "size-6 rounded hover:bg-accent transition-opacity focus:opacity-100",
+                "size-6 rounded transition-opacity focus:opacity-100 items-center justify-center grid text-gray-400 cursor-pointer",
                 isCollapsed
                   ? "opacity-0 pointer-events-none"
-                  : hoveredChatId === chat.id
-                  ? "opacity-100"
-                  : "opacity-0 pointer-events-none"
+                  : "opacity-0 group-hover/chat:opacity-100"
               )}
               onClick={(e) => e.stopPropagation()}
               aria-label="Меню чата"
             >
               <Ellipsis className="size-4 text-gray-400" />
-            </button>
+            </span>
           </PopoverTrigger>
         </div>
       </p>
@@ -144,7 +126,7 @@ const AppSidebarPopover = ({
       >
         <div className="flex flex-col">
           <button
-            onClick={() => setEditingChatId(chat.id)}
+            onClick={startEdit}
             className="text-left px-2 py-1 rounded hover:bg-muted"
           >
             Переименовать
@@ -156,7 +138,7 @@ const AppSidebarPopover = ({
             {isPinned ? "Открепить" : "Закрепить"}
           </button>
           <button
-            onClick={() => onDeleteChat(chat.id)}
+            onClick={() => void deleteChat(chat.id)}
             className="text-left px-2 py-1 rounded hover:bg-muted text-red-600"
           >
             Удалить

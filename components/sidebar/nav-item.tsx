@@ -6,17 +6,16 @@ export function NavItem({
   icon,
   label,
   collapsed,
+  onClick,
 }: {
-  href: string;
+  href?: string;
   icon: React.ReactNode;
   label: string;
   collapsed: boolean;
+  onClick?: () => void;
 }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition-colors"
-    >
+  const content = (
+    <>
       <span className="shrink-0">{icon}</span>
       <span
         className={cn(
@@ -26,6 +25,23 @@ export function NavItem({
       >
         {label}
       </span>
-    </Link>
+    </>
+  );
+
+  const baseClasses =
+    "flex w-full items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition-colors";
+
+  if (href) {
+    return (
+      <Link href={href} className={baseClasses}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button onClick={onClick} type="button" className={baseClasses}>
+      {content}
+    </button>
   );
 }

@@ -8,6 +8,7 @@ interface State {
   //   deletePinnedChat: (chatId: number) => void;
   togglePinnedChat: (chat: Chat) => void;
   removePinnedById: (id: number) => void;
+  renameChatTitle: (chatId: number, title: string) => void;
 }
 
 // export const usePinnedChatsStore = create<State>()(
@@ -41,7 +42,14 @@ export const usePinnedChatsStore = create<State>()(
         })),
       removePinnedById: (id) =>
         set((s) => ({ pinnedChats: s.pinnedChats.filter((p) => p.id !== id) })),
+      renameChatTitle: (chatId: number, title: string) =>
+        set((s) => ({
+          pinnedChats: s.pinnedChats.filter((pch) =>
+            pch.id === chatId ? (pch.title = title) : pch
+          ),
+        })),
     }),
+
     {
       name: "pinned-chats-store",
     }
