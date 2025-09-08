@@ -1,4 +1,4 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/prisma/prisma-client";
 import { Prisma } from "@prisma/client";
 import { getServerSession } from "next-auth";
@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 // DELETE chat by id
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id?: string | string[] }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user.id) {
@@ -18,7 +18,9 @@ export async function DELETE(
       }
     );
   }
-  const chatId = Number(params.id);
+  const resolved = (await params) ?? {};
+  const rawId = Array.isArray(resolved.id) ? resolved.id[0] : resolved.id;
+  const chatId = Number(rawId);
   const userId = Number(session.user.id);
   if (!Number.isFinite(chatId)) {
     return NextResponse.json({ error: "Invalid chat id" }, { status: 400 });
@@ -64,7 +66,7 @@ export async function DELETE(
 // Change title
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id?: string | string[] }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return new Response("Unauthorized", { status: 401 });
@@ -78,7 +80,9 @@ export async function PATCH(
       );
     }
 
-    const chatId = Number(params.id);
+    const resolved = (await params) ?? {};
+    const rawId = Array.isArray(resolved.id) ? resolved.id[0] : resolved.id;
+    const chatId = Number(rawId);
 
     const updated = await prisma.chat.update({
       where: { id: chatId },

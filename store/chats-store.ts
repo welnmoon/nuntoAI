@@ -10,6 +10,7 @@ interface State {
   setChats: (chats: Chat[]) => void;
   removeChat: (chatId: number) => void;
   updateChatName: (chatId: number, name: string) => void;
+  touchChat: (chatId: number, at?: Date) => void; // обновить updatedAt для сортировки
   pendingMessages: Record<number, Message[]>;
   addPendingMessage: (chatId: number, msg: Message) => void;
   clearPendingMessages: (chatId: number) => void;
@@ -35,6 +36,12 @@ export const useChatStore = create<State>()(
         set((state) => ({
           chats: state.chats.map((chat) =>
             chat.id === chatId ? { ...chat, name } : chat
+          ),
+        })),
+      touchChat: (chatId: number, at?: Date) =>
+        set((state) => ({
+          chats: state.chats.map((chat) =>
+            chat.id === chatId ? { ...chat, updatedAt: at ?? new Date() } : chat
           ),
         })),
       addPendingMessage: (chatId: number, msg: Message) =>

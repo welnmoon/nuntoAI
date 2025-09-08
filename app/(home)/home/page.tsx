@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import ChatComponent from "@/components/chat/chat";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Providers } from "@/components/providers/Providers";
-import { getServerSession } from "next-auth";
 import { Toaster } from "react-hot-toast";
+import { AccentColorApplier } from "@/components/accent-color-applier";
 
 export const metadata: Metadata = {
   title: "Nunto AI",
@@ -18,6 +17,7 @@ export default function RootLayout({
     <html lang="ru">
       <body className={``}>
         <Toaster position="top-right" />
+        <AccentColorApplier />
         {children}
       </body>
     </html>

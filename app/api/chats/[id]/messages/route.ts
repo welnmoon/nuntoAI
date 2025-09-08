@@ -78,10 +78,12 @@ async function suggestTitleWithAI(text: string): Promise<string | null> {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id?: string | string[] }> }
 ) {
   try {
-    const chatId = Number(params.id);
+    const resolved = (await params) ?? {};
+    const rawId = Array.isArray(resolved.id) ? resolved.id[0] : resolved.id;
+    const chatId = Number(rawId);
     if (!chatId || isNaN(chatId)) {
       return NextResponse.json({ error: "Invalid chat id." }, { status: 400 });
     }
@@ -120,6 +122,17 @@ export async function POST(
         chatId,
       },
     });
+
+    // Обновляем updatedAt у чата, чтобы в списке чатов он поднимался наверх
+    try {
+      await prisma.chat.update({
+        where: { id: chatId },
+        data: { updatedAt: new Date() },
+      });
+    } catch (e) {
+      // Не критично для основного потока, просто логируем
+      console.warn("Failed to bump chat updatedAt:", e);
+    }
 
     // Автогенерация названия чата по первому пользовательскому сообщению
     // 1) Только для USER-сообщения

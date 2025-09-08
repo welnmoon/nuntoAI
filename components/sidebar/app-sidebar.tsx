@@ -45,9 +45,10 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
 
   // Search logic
   const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const FlagSettingModalOpen = searchModalOpen === true;
   useEffect(() => {
     setOpenProfileModal(false);
-  }, [settingsModalOpen == true]);
+  }, [FlagSettingModalOpen]);
 
   return (
     <Sidebar collapsible="icon" className="group/sidebar py-4">

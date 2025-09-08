@@ -4,17 +4,19 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/prisma/prisma-client";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id?: string | string[] }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const chatId = Number(params.id);
+  const resolved = (await params) ?? {};
+  const rawId = Array.isArray(resolved.id) ? resolved.id[0] : resolved.id;
+  const chatId = Number(rawId);
   const body = await req.json().catch(() => ({}));
   if (typeof body.enable !== "boolean") {
     return NextResponse.json({ error: "enable must be boolean" }, { status: 400 });

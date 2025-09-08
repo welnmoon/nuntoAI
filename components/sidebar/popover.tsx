@@ -144,12 +144,7 @@ const AppSidebarPopover = ({ chat, isCollapsed, index }: Props) => {
           >
             Удалить
           </button>
-          <button
-            onClick={() => {}}
-            className="text-left px-2 py-1 rounded hover:bg-muted text-red-600"
-          >
-            Поделиться
-          </button>
+
           <ShareToggle
             chatId={chat.id}
             isShared={chat.visibility === "SHARED"}

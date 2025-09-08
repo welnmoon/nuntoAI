@@ -1,5 +1,6 @@
 // внутри AppSidebarPopover (или страницы чата)
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export function ShareToggle({
   chatId,
@@ -22,7 +23,10 @@ export function ShareToggle({
         body: JSON.stringify({ enable: !shared }),
       });
       if (!res.ok) return;
-      const data: { publicId: string | null; visibility: "SHARED" | "PRIVATE" } = await res.json();
+      const data: {
+        publicId: string | null;
+        visibility: "SHARED" | "PRIVATE";
+      } = await res.json();
       setShared(data.visibility === "SHARED");
       setPid(data.publicId ?? undefined);
       // тут можно дернуть стора, если хотите синхронизировать списки
@@ -31,27 +35,39 @@ export function ShareToggle({
     }
   };
 
-  const origin = typeof window !== "undefined" ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL ?? "");
+  const origin =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : process.env.NEXT_PUBLIC_APP_URL ?? "";
   const link = pid ? `${origin}/p/${pid}` : "";
 
   return (
-    <div className="flex items-center gap-2">
-      <button
-        onClick={onToggle}
-        disabled={loading}
-        className="px-2 py-1 rounded hover:bg-muted"
-      >
-        {shared ? "Отключить доступ" : "Поделиться"}
-      </button>
-      {shared && pid && (
-        <button
-          onClick={async () => {
-            await navigator.clipboard.writeText(link);
-          }}
-          className="px-2 py-1 rounded hover:bg-muted"
-        >
-          Скопировать ссылку
-        </button>
+    <div>
+      {loading ? (
+        <span className="text-sm text-muted-foreground">Загрузка...</span>
+      ) : (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onToggle}
+            disabled={loading}
+            className="px-2 py-1 rounded hover:bg-muted"
+          >
+            {shared ? "Отключить доступ" : "Поделиться"}
+          </button>
+          {shared && pid && (
+            <button
+              onClick={async () => {
+                await navigator.clipboard.writeText(link);
+                toast.success("Ссылка скопирована в буфер обмена", {
+                  position: "top-left",
+                });
+              }}
+              className="px-2 py-1 rounded hover:bg-muted"
+            >
+              Скопировать ссылку
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

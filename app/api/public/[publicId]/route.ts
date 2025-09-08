@@ -4,10 +4,14 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { publicId: string } }
+  { params }: { params: Promise<{ publicId?: string | string[] }> }
 ) {
+  const resolved = (await params) ?? {};
+  const publicIdRaw = Array.isArray(resolved.publicId)
+    ? resolved.publicId[0]
+    : resolved.publicId;
   const chat = await prisma.chat.findUnique({
-    where: { publicId: params.publicId },
+    where: { publicId: publicIdRaw ?? "" },
     select: {
       id: true,
       title: true,

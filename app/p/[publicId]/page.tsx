@@ -1,6 +1,7 @@
 // app/p/[publicId]/page.tsx
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { Message } from "@prisma/client";
 
 async function getData(publicId: string) {
   const res = await fetch(
@@ -16,9 +17,13 @@ async function getData(publicId: string) {
 export default async function PublicChatPage({
   params,
 }: {
-  params: { publicId: string };
+  params?: Promise<{ publicId?: string | string[] }>;
 }) {
-  const data = await getData(params.publicId);
+  const resolved = (await params) ?? {};
+  const publicIdRaw = Array.isArray(resolved.publicId)
+    ? resolved.publicId[0]
+    : resolved.publicId;
+  const data = publicIdRaw ? await getData(publicIdRaw) : null;
   if (!data) return notFound();
 
   return (
@@ -27,7 +32,7 @@ export default async function PublicChatPage({
       <main className="mx-auto max-w-2xl p-4">
         <h1 className="text-xl font-semibold mb-4">{data.title}</h1>
         <div className="space-y-3">
-          {data.messages.map((m: any) => (
+          {data.messages.map((m: Message) => (
             <div key={m.id} className="rounded-md border p-3">
               <div className="text-xs text-muted-foreground mb-1">
                 {m.role.toLowerCase()}
@@ -41,9 +46,17 @@ export default async function PublicChatPage({
   );
 }
 
-export async function generateMetadata({ params }: { params: { publicId: string } }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params?: Promise<{ publicId?: string | string[] }>;
+}): Promise<Metadata> {
+  const resolved = (await params) ?? {};
+  const publicIdRaw = Array.isArray(resolved.publicId)
+    ? resolved.publicId[0]
+    : resolved.publicId;
   return {
     robots: { index: false, follow: false },
-    alternates: { canonical: `/p/${params.publicId}` },
+    alternates: { canonical: `/p/${publicIdRaw ?? ""}` },
   };
 }
