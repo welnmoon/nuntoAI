@@ -115,10 +115,7 @@ const SearchModal = ({ chats, openModal, setOpenModal }: Props) => {
       <DialogPortal>
         <DialogOverlay className="fixed inset-0 bg-black/80" />
 
-        {/* ФИКСИРУЕМ РАЗМЕР МОДАЛКИ: ширина/высота постоянные */}
         <DialogContent className="w-[720px]  max-w-[calc(100%-2rem)] h-[560px] p-0 shadow-2xl shadow-black/40">
-          <DialogTitle></DialogTitle>
-
           {/* Внутренняя компоновка: колонка, скролл в контенте */}
           <div className="flex h-full flex-col">
             {/* Хедер фиксированный */}
@@ -168,7 +165,6 @@ const SearchModal = ({ chats, openModal, setOpenModal }: Props) => {
               )}
             </div>
           </div>
-
         </DialogContent>
       </DialogPortal>
     </Dialog>
