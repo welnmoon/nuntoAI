@@ -1,9 +1,6 @@
 // components/profile/profile-modal.tsx
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
 
 import { Session } from "next-auth";
@@ -21,19 +18,6 @@ export default function ProfileModal({
   session: Session | null;
   setSettingsModalOpen: (open: boolean) => void;
 }) {
-  const { status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/login");
-    }
-  }, [status, router]);
-
-  if (!session) {
-    router.replace("/login");
-  }
-
   return (
     <Dialog open={openModal} onOpenChange={setOpenModal}>
       <DialogPortal>

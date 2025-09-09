@@ -22,23 +22,30 @@ export function ShareToggle({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enable: !shared }),
       });
-      if (!res.ok) return;
-      const data: {
-        publicId: string | null;
-        visibility: "SHARED" | "PRIVATE";
-      } = await res.json();
-      setShared(data.visibility === "SHARED");
+      if (!res.ok) {
+        let message = `Не удалось ${!shared ? "включить" : "отключить"} доступ`;
+        try {
+          const j = await res.json();
+          if (j?.error) message = j.error;
+        } catch {}
+        toast.error(message, { position: "top-left" });
+        return;
+      }
+      const data: { publicId: string | null; visibility: "SHARED" | "PRIVATE" } =
+        await res.json();
+      const nowShared = data.visibility === "SHARED";
+      setShared(nowShared);
       setPid(data.publicId ?? undefined);
+      toast.success(nowShared ? "Публичный доступ включен" : "Публичный доступ отключен", {
+        position: "top-left",
+      });
       // тут можно дернуть стора, если хотите синхронизировать списки
     } finally {
       setLoading(false);
     }
   };
 
-  const origin =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
   const link = pid ? `${origin}/p/${pid}` : "";
 
   return (
@@ -57,10 +64,16 @@ export function ShareToggle({
           {shared && pid && (
             <button
               onClick={async () => {
-                await navigator.clipboard.writeText(link);
-                toast.success("Ссылка скопирована в буфер обмена", {
-                  position: "top-left",
-                });
+                try {
+                  await navigator.clipboard.writeText(link);
+                  toast.success("Ссылка скопирована в буфер обмена", {
+                    position: "top-left",
+                  });
+                } catch (e) {
+                  toast.error("Не удалось скопировать ссылку", {
+                    position: "top-left",
+                  });
+                }
               }}
               className="px-2 py-1 rounded hover:bg-muted"
             >

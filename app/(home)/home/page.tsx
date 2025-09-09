@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
-  console.log("SESSION:", session);
 
   // Не создаем чат автоматически, только проверяем авторизацию
   if (!session?.user) {

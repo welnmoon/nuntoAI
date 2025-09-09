@@ -1,17 +1,26 @@
 // app/p/[publicId]/page.tsx
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Message } from "@prisma/client";
+import { headers } from "next/headers";
+
+// Disable static rendering to avoid caching/mismatch
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 async function getData(publicId: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/public/${publicId}`,
-    {
-      cache: "no-store",
-    }
-  );
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const h = await headers();
+    const proto = h.get("x-forwarded-proto") ?? "http";
+    const host = h.get("host");
+    const url = host
+      ? `${proto}://${host}/api/public/${publicId}`
+      : `/api/public/${publicId}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 export default async function PublicChatPage({
@@ -32,14 +41,16 @@ export default async function PublicChatPage({
       <main className="mx-auto max-w-2xl p-4">
         <h1 className="text-xl font-semibold mb-4">{data.title}</h1>
         <div className="space-y-3">
-          {data.messages.map((m: Message) => (
-            <div key={m.id} className="rounded-md border p-3">
-              <div className="text-xs text-muted-foreground mb-1">
-                {m.role.toLowerCase()}
+          {data.messages.map(
+            (m: { id: number; role: string; content: string }) => (
+              <div key={m.id} className="rounded-md border p-3">
+                <div className="text-xs text-muted-foreground mb-1">
+                  {m.role.toLowerCase()}
+                </div>
+                <div className="whitespace-pre-wrap">{m.content}</div>
               </div>
-              <div className="whitespace-pre-wrap">{m.content}</div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </main>
     </>
