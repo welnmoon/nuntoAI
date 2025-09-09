@@ -10,6 +10,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import SearchInput from "./search-input";
+import { ISODateString } from "next-auth";
 
 const TZ = "Asia/Almaty";
 
@@ -59,8 +60,8 @@ const SearchModal = ({ chats, openModal, setOpenModal }: Props) => {
       .slice()
       .sort(
         (a, b) =>
-          new Date(b.createdAt as unknown as any).getTime() -
-          new Date(a.createdAt as unknown as any).getTime()
+          new Date(b.createdAt as unknown as ISODateString).getTime() -
+          new Date(a.createdAt as unknown as ISODateString).getTime()
       );
   }, [chats, searchTerm]);
 
@@ -71,7 +72,7 @@ const SearchModal = ({ chats, openModal, setOpenModal }: Props) => {
       { key: string; items: Chat[]; sampleDate: Date }
     >();
     for (const chat of filteredSorted) {
-      const d = new Date(chat.createdAt as unknown as any);
+      const d = new Date(chat.createdAt as unknown as ISODateString);
       const key = localDayKey(d);
       const group = byDay.get(key);
       if (group) group.items.push(chat);
@@ -167,7 +168,7 @@ const SearchModal = ({ chats, openModal, setOpenModal }: Props) => {
               )}
             </div>
           </div>
-"use client";
+
         </DialogContent>
       </DialogPortal>
     </Dialog>
