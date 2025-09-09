@@ -1,5 +1,6 @@
 "use client";
 import { Forward, LoaderCircle } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 
@@ -20,6 +21,7 @@ const SendToAIForm = ({
 }: Props) => {
   const missingHandlers = !handleSubmit || !setInput || input === undefined;
   const toastIdRef = useRef<string | null>(null);
+  const session = useSession();
 
   useEffect(() => {
     if (loading) {
@@ -46,7 +48,7 @@ const SendToAIForm = ({
             handleSubmit!(e as unknown as React.FormEvent<HTMLFormElement>);
           }
         }}
-        value={input}
+        value={session.data?.user.id}
         onChange={(e) => setInput!(e.target.value)}
         placeholder="Введите сообщение для ИИ..."
         className="py-3 px-5 bg-white border border-gray-300 rounded-3xl resize-none focus:outline-none"

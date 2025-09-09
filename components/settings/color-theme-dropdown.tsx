@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Select,
   SelectContent,
@@ -44,7 +46,7 @@ const ColorThemeSelect = () => {
         <SelectTrigger className="w-44">
           <SelectValue placeholder="Выберите цвет" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position="popper" sideOffset={4} className="z-[60]">
           {Object.keys(colorMap).map((c) => (
             <SelectItem key={c} value={c}>
               <div className="flex items-center gap-2">

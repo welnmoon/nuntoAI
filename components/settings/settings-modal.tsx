@@ -1,5 +1,14 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import ColorThemeDropdown from "./color-theme-dropdown";
+"use client";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogOverlay,
+  DialogPortal,
+} from "@/components/ui/dialog";
+import ColorThemeSelect from "./color-theme-dropdown";
 
 export function SettingsModal({
   settingsModalOpen,
@@ -10,13 +19,16 @@ export function SettingsModal({
 }) {
   return (
     <Dialog open={settingsModalOpen} onOpenChange={setSettingsModalOpen}>
-      <DialogContent className="fixed top-1/2 left-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-background p-6 shadow-lg">
-        <DialogHeader>
-          <DialogTitle>Настройки</DialogTitle>
-        </DialogHeader>
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 bg-black/80" />
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Настройки</DialogTitle>
+          </DialogHeader>
 
-        <ColorThemeDropdown />
-      </DialogContent>
+          <ColorThemeSelect />
+        </DialogContent>
+      </DialogPortal>
     </Dialog>
   );
 }
