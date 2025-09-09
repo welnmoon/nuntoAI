@@ -49,7 +49,7 @@ const AppSidebarPopover = ({ chat, isCollapsed, index }: Props) => {
 
   return (
     <Popover key={chat.id}>
-      <p
+      <div
         onClick={() => {
           if (!editing) openChat(chat.id);
         }}
@@ -116,7 +116,7 @@ const AppSidebarPopover = ({ chat, isCollapsed, index }: Props) => {
             </span>
           </PopoverTrigger>
         </div>
-      </p>
+      </div>
 
       <PopoverContent
         side="right"

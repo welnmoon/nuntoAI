@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     const completion = await openai.chat.completions.create({
       model: "openai/gpt-4o",
       messages: [{ role: "user", content: message }],
-      max_tokens: 1000,
+      max_tokens: 512,
       stream: true,
     });
 
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
 
     return new NextResponse(stream, {
       headers: {
-        "Content-Type": "application/octet-stream; charset=utf-8", // до этого был reply. Что это?
+        "Content-Type": "application/octet-stream; charset=utf-8", 
       },
     });
   } catch (error) {

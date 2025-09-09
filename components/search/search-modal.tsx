@@ -3,6 +3,7 @@ import {
   DialogContent,
   DialogOverlay,
   DialogPortal,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Chat } from "@prisma/client";
 import Link from "next/link";
@@ -54,7 +55,13 @@ const SearchModal = ({ chats, openModal, setOpenModal }: Props) => {
     const arr = q
       ? chats.filter((c) => c.title.toLowerCase().includes(q))
       : chats;
-    return arr.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return arr
+      .slice()
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt as unknown as any).getTime() -
+          new Date(a.createdAt as unknown as any).getTime()
+      );
   }, [chats, searchTerm]);
 
   // 2) Группируем по дням и отбираем максимум 10 элементов в порядке: сегодня → вчера → остальные
@@ -64,10 +71,11 @@ const SearchModal = ({ chats, openModal, setOpenModal }: Props) => {
       { key: string; items: Chat[]; sampleDate: Date }
     >();
     for (const chat of filteredSorted) {
-      const key = localDayKey(chat.createdAt);
+      const d = new Date(chat.createdAt as unknown as any);
+      const key = localDayKey(d);
       const group = byDay.get(key);
       if (group) group.items.push(chat);
-      else byDay.set(key, { key, items: [chat], sampleDate: chat.createdAt });
+      else byDay.set(key, { key, items: [chat], sampleDate: d });
     }
 
     const now = new Date();
@@ -108,6 +116,8 @@ const SearchModal = ({ chats, openModal, setOpenModal }: Props) => {
 
         {/* ФИКСИРУЕМ РАЗМЕР МОДАЛКИ: ширина/высота постоянные */}
         <DialogContent className="w-[720px]  max-w-[calc(100%-2rem)] h-[560px] p-0 shadow-2xl shadow-black/40">
+          <DialogTitle></DialogTitle>
+
           {/* Внутренняя компоновка: колонка, скролл в контенте */}
           <div className="flex h-full flex-col">
             {/* Хедер фиксированный */}
@@ -157,6 +167,7 @@ const SearchModal = ({ chats, openModal, setOpenModal }: Props) => {
               )}
             </div>
           </div>
+"use client";
         </DialogContent>
       </DialogPortal>
     </Dialog>
