@@ -7,6 +7,8 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { GlobalSidebarToggle } from "@/components/global-sidebar-toggle";
 import { Chat } from "@prisma/client";
+import { TvIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function Providers({
   children,
@@ -17,15 +19,20 @@ export function Providers({
   session?: Session | null;
   chats?: Chat[];
 }) {
+  const isAuthenticated = !!session?.user;
   return (
     <SessionProvider session={session}>
-      <SidebarProvider className="bg-gray-50" defaultOpen>
-        {/* Глобальная кнопка — всегда в левом верхнем углу */}
-        <GlobalSidebarToggle />
+      {isAuthenticated ? (
+        <SidebarProvider className="bg-gray-50" defaultOpen>
+          {/* Глобальная кнопка — всегда в левом верхнем углу */}
+          <GlobalSidebarToggle />
+          <AppSidebar chats={chats} />
 
-        <AppSidebar chats={chats} />
-        <SidebarInset>{children}</SidebarInset>
-      </SidebarProvider>
+          <SidebarInset>{children}</SidebarInset>
+        </SidebarProvider>
+      ) : (
+        <div>{children}</div>
+      )}
     </SessionProvider>
   );
 }

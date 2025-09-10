@@ -10,13 +10,18 @@ import ChatMessages from "./chat-messages";
 import { MessageCircleIcon } from "lucide-react";
 import { Chat, Message } from "@prisma/client";
 import { useChatController } from "./use-chat-controller";
+import { useSession } from "next-auth/react";
+import LogInBtn from "../buttons/log-in-btn";
 
 interface Props {
   chat?: Chat;
   messages: Message[];
 }
 
-export default function ChatComponent({ chat, messages: initialMessages }: Props) {
+export default function ChatComponent({
+  chat,
+  messages: initialMessages,
+}: Props) {
   const {
     input,
     setInput,
@@ -30,7 +35,8 @@ export default function ChatComponent({ chat, messages: initialMessages }: Props
     handleSubmit,
     toggleTemporary,
   } = useChatController({ chat, initialMessages });
-
+  const session = useSession();
+  const isAuthenticated = !!session.data?.user;
   return (
     <main className="min-h-screen flex flex-col w-[90%] md:w-1/2 max-w-[700px] mx-auto">
       {messages.length > 0 ? (
@@ -72,13 +78,19 @@ export default function ChatComponent({ chat, messages: initialMessages }: Props
       )}
 
       {/* Тогглер «временного» режима — просто ставим параметр query */}
-      {!chatId && (
+      {!chatId && isAuthenticated && (
         <MessageCircleIcon
           className={`cursor-pointer absolute top-5 right-5 ${
             isTemporary ? "text-blue-500" : "text-black"
           } size-6`}
           onClick={toggleTemporary}
         />
+      )}
+
+      {!isAuthenticated && (
+        <div className="absolute top-4 right-10">
+          <LogInBtn />
+        </div>
       )}
     </main>
   );

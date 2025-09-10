@@ -1,11 +1,18 @@
 // components/profile/profile-modal.tsx
 "use client";
 
-import { Dialog, DialogContent, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+} from "@/components/ui/dialog";
 
 import { Session } from "next-auth";
-import { Settings, UserCircle } from "lucide-react";
+import { LogIn, LogOut, Settings, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import LogOutBtn from "../buttons/log-out-btn";
+import LogInBtn from "../buttons/log-in-btn";
 
 export default function ProfileModal({
   openModal,
@@ -18,6 +25,7 @@ export default function ProfileModal({
   session: Session | null;
   setSettingsModalOpen: (open: boolean) => void;
 }) {
+  const isAuthenticated = !!session?.user;
   return (
     <Dialog open={openModal} onOpenChange={setOpenModal}>
       <DialogPortal>
@@ -57,6 +65,7 @@ export default function ProfileModal({
                 Настройки
               </span>
             </p>
+            {isAuthenticated && <LogOutBtn />}
           </div>
         </DialogContent>
       </DialogPortal>
