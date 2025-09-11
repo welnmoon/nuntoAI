@@ -8,7 +8,7 @@ import Heading from "@/components/headers/heading";
 import { loginSchema } from "./loginSchema";
 import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { CLIENT_ROUTES } from "@/lib/client-routes";
 import { useState } from "react";
 
@@ -22,6 +22,7 @@ const LoginForm = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const onLoginSubmit = async () => {
     setLoading(true);
@@ -37,9 +38,9 @@ const LoginForm = () => {
       return;
     } else {
       toast.success("Вы успешно вошли в систему!");
-      redirect(CLIENT_ROUTES.home);
+      setLoading(false);
+      router.push(CLIENT_ROUTES.home);
     }
-    setLoading(false);
   };
   return (
     <div className="w-[300px] bg-white dark:bg-neutral-800 p-6 rounded-xl">
