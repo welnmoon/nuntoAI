@@ -11,7 +11,7 @@ const RegisterPage = async () => {
     redirect(CLIENT_ROUTES.home);
   }
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div className="bg-gray-100 dark:bg-neutral-900 min-h-screen flex items-center justify-center">
       <RegisterForm />
     </div>
   );

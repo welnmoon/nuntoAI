@@ -43,7 +43,7 @@ export default async function PublicChatPage({
         <div className="space-y-3">
           {data.messages.map(
             (m: { id: number; role: string; content: string }) => (
-              <div key={m.id} className="rounded-md border p-3">
+              <div key={m.id} className="rounded-md border dark:border-zinc-800 p-3">
                 <div className="text-xs text-muted-foreground mb-1">
                   {m.role.toLowerCase()}
                 </div>

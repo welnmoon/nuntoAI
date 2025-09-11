@@ -9,6 +9,7 @@ import {
   DialogPortal,
 } from "@/components/ui/dialog";
 import ColorThemeSelect from "./color-theme-dropdown";
+import ThemeSwitcher from "./theme-switcher";
 
 export function SettingsModal({
   settingsModalOpen,
@@ -27,6 +28,7 @@ export function SettingsModal({
           </DialogHeader>
 
           <ColorThemeSelect />
+          <ThemeSwitcher />
         </DialogContent>
       </DialogPortal>
     </Dialog>

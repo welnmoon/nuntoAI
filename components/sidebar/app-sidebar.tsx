@@ -7,9 +7,10 @@ import {
   SidebarContent,
   SidebarHeader,
   SidebarRail,
+  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { MessagesSquare, Search, TvIcon } from "lucide-react";
+import { MessagesSquare, Search, TvIcon, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Chat } from "@prisma/client";
 import { CLIENT_ROUTES } from "@/lib/client-routes";
@@ -19,7 +20,6 @@ import ProfileModal from "../profile/profile-modal";
 import { NavItem } from "./nav-item";
 import AppSidebarPopover from "./popover";
 import { usePinnedChatsStore } from "@/store/pinned-chats-store";
-import SidebarFooterComponent from "./sidebar-footer";
 import SearchModal from "../search/search-modal";
 import { SettingsModal } from "../settings/settings-modal";
 
@@ -55,7 +55,7 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
       <SidebarHeader className="px-3 py-2 mb-5">
         <div className="flex gap-2 items-center">
           <TvIcon className="size-6 shrink-0" />
-          <span className={cn("shrink-0", isCollapsed && "hidden")}>
+          <span className={cn("shrink-0", isCollapsed && "hidden")}> 
             Nunto AI
           </span>
         </div>
@@ -82,7 +82,7 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
           <div className="space-y-1 mb-5">
             <p
               className={cn(
-                "text-md text-gray-500 shrink-0",
+                "text-md text-gray-500 dark:text-gray-400 shrink-0",
                 isCollapsed && "hidden"
               )}
             >
@@ -109,7 +109,7 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
           <div className="space-y-1">
             <p
               className={cn(
-                "text-md text-gray-500 shrink-0",
+                "text-md text-gray-500 dark:text-gray-400 shrink-0",
                 isCollapsed && "hidden"
               )}
             >
@@ -133,17 +133,26 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
         )}
       </SidebarContent>
 
-      <SidebarFooterComponent
-        isCollapsed={isCollapsed}
-        session={session}
-        setOpenModal={setOpenProfileModal}
-      />
-
       <ProfileModal
         session={session}
         openModal={openProfileModal}
         setOpenModal={setOpenProfileModal}
         setSettingsModalOpen={setSettingsModalOpen}
+        trigger={
+          <SidebarFooter>
+            <div className="flex items-center gap-2 cursor-pointer px-2 py-1 hover:bg-muted rounded-md transition-colors">
+              <UserCircle className="size-7 shrink-0" />
+              <span
+                className={cn(
+                  "min-w-0 truncate transition-opacity duration-200 ",
+                  isCollapsed ? "opacity-0" : "opacity-100"
+                )}
+              >
+                {session?.user?.name || session?.user?.email || "Гость"}
+              </span>
+            </div>
+          </SidebarFooter>
+        }
       />
       <SettingsModal
         setSettingsModalOpen={setSettingsModalOpen}

@@ -4,6 +4,7 @@ import { Providers } from "@/components/providers/Providers";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/prisma/prisma-client";
 import { authOptions } from "@/lib/auth";
+import { AccentColorApplier } from "@/components/accent-color-applier";
 
 export const metadata: Metadata = {
   title: "Nunto AI",
@@ -21,8 +22,9 @@ export default async function HomeLayout({
   });
   return (
     <html lang="ru">
-      <body className={``}>
+      <body>
         <Providers chats={chats} session={session}>
+          <AccentColorApplier />
           {children}
         </Providers>
       </body>

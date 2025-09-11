@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { CLIENT_ROUTES } from "@/lib/client-routes";
+import { useState } from "react";
 
 const RegisterForm = () => {
   const router = useRouter();
@@ -22,8 +23,10 @@ const RegisterForm = () => {
       password: "",
     },
   });
+  const [loading, setLoading] = useState(false);
 
   const onRegisterSubmit = async () => {
+    setLoading(true);
     try {
       const payload = form.getValues() as registerSchemaType; // { email, password, fullName, ... }
 
@@ -47,11 +50,11 @@ const RegisterForm = () => {
         toast.error(msg ?? `Ошибка регистрации (${res.status})`);
         return;
       }
-
+      setLoading(false);
       // Успешно зарегистрирован → сразу логиним тем же email/password из формы
       const login = await signIn("credentials", {
         email: payload.email,
-        password: payload.password, 
+        password: payload.password,
         redirect: false,
       });
 
@@ -69,7 +72,7 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className="w-[300px] bg-white p-6 rounded-xl">
+    <div className="w-[300px] bg-white dark:bg-neutral-800 p-6 rounded-xl">
       <Heading level={2} className="mb-4">
         Регистрация
       </Heading>
@@ -90,12 +93,19 @@ const RegisterForm = () => {
             placeholder="Введите пароль"
             type="password"
           />
-          <SecondaryButton type="submit" text="Зарегистрироваться" />
+          <SecondaryButton
+            loading={loading}
+            type="submit"
+            text="Зарегистрироваться"
+          />
         </form>
       </FormProvider>
-      <p className="mt-4 text-sm text-gray-500 text-center">
+      <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
         Уже зарегистрированы?{" "}
-        <a href="/login" className="text-blue-500 hover:underline">
+        <a
+          href="/login"
+          className="text-blue-500 dark:text-blue-400 hover:underline"
+        >
           Войти
         </a>
       </p>

@@ -55,7 +55,7 @@ const AppSidebarPopover = ({ chat, isCollapsed, index }: Props) => {
         }}
         className={cn(
           "group/chat flex items-center gap-2 px-2 py-1 rounded-md hover:bg-muted transition-colors shrink-0 overflow-hidden",
-          isActive && "bg-white font-semibold"
+          isActive && "bg-white dark:bg-zinc-800 font-semibold"
         )}
       >
         <span
@@ -104,7 +104,7 @@ const AppSidebarPopover = ({ chat, isCollapsed, index }: Props) => {
           <PopoverTrigger asChild>
             <span
               className={cn(
-                "size-6 rounded transition-opacity focus:opacity-100 items-center justify-center grid text-gray-400 cursor-pointer",
+                "size-6 rounded transition-opacity focus:opacity-100 items-center justify-center grid text-gray-400 dark:text-gray-300 cursor-pointer",
                 isCollapsed
                   ? "opacity-0 pointer-events-none"
                   : "opacity-0 group-hover/chat:opacity-100"
@@ -112,7 +112,7 @@ const AppSidebarPopover = ({ chat, isCollapsed, index }: Props) => {
               onClick={(e) => e.stopPropagation()}
               aria-label="Меню чата"
             >
-              <Ellipsis className="size-4 text-gray-400" />
+              <Ellipsis className="size-4 text-gray-400 dark:text-gray-300" />
             </span>
           </PopoverTrigger>
         </div>

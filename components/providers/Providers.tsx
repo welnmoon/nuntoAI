@@ -9,6 +9,7 @@ import { GlobalSidebarToggle } from "@/components/global-sidebar-toggle";
 import { Chat } from "@prisma/client";
 import { TvIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeProviders } from "./theme-provider";
 
 export function Providers({
   children,
@@ -22,17 +23,19 @@ export function Providers({
   const isAuthenticated = !!session?.user;
   return (
     <SessionProvider session={session}>
-      {isAuthenticated ? (
-        <SidebarProvider className="bg-gray-50" defaultOpen>
-          {/* Глобальная кнопка — всегда в левом верхнем углу */}
-          <GlobalSidebarToggle />
-          <AppSidebar chats={chats} />
+      <ThemeProviders>
+        {isAuthenticated ? (
+          <SidebarProvider className="bg-gray-50 dark:bg-gray-900" defaultOpen>
+            {/* Глобальная кнопка — всегда в левом верхнем углу */}
+            <GlobalSidebarToggle />
+            <AppSidebar chats={chats} />
 
-          <SidebarInset>{children}</SidebarInset>
-        </SidebarProvider>
-      ) : (
-        <div>{children}</div>
-      )}
+            <SidebarInset>{children}</SidebarInset>
+          </SidebarProvider>
+        ) : (
+          <div>{children}</div>
+        )}
+      </ThemeProviders>
     </SessionProvider>
   );
 }

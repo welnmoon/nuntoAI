@@ -36,7 +36,7 @@ const SendToAIForm = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`relative flex flex-col gap-4 bg-white pb-3 ${
+      className={`dark:bg-transparent relative flex flex-col gap-4 bg-white pb-3 ${
         width ? width : "w-100"
       } ${isFormDisabled ? "opacity-50" : ""}`}
     >
@@ -50,7 +50,8 @@ const SendToAIForm = ({
         value={input}
         onChange={(e) => setInput!(e.target.value)}
         placeholder="Введите сообщение для ИИ..."
-        className="py-3 px-5 bg-white border border-gray-300 rounded-3xl resize-none focus:outline-none"
+        className="dark:border-none shadow-md py-3 px-5 bg-white border border-gray-300 rounded-3xl resize-none focus:outline-none
+        dark:bg-zinc-800"
         rows={2}
         disabled={isFormDisabled}
       />

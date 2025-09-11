@@ -1,9 +1,5 @@
 "use client";
 
-/**
- * Упрощённый контейнер чата.
- * Вся бизнес-логика вынесена в useChatController, здесь остаётся разметка.
- */
 import SendToAIForm from "@/components/form/main-form/send-to-ai-form";
 import Heading from "@/components/headers/heading";
 import ChatMessages from "./chat-messages";
@@ -63,7 +59,7 @@ export default function ChatComponent({
       )}
 
       {messages.length > 0 && (
-        <section className="sticky bottom-0 bg-white border-t px-4 py-3 place-items-center">
+        <section className="dark:bg-transparent sticky bottom-0 bg-white border-t dark:border-t-gray-800 px-4 py-3 place-items-center">
           <SendToAIForm
             input={input}
             setInput={setInput}
@@ -71,7 +67,7 @@ export default function ChatComponent({
             handleSubmit={handleSubmit}
             width="w-full"
           />
-          <footer className="text-center text-xs text-gray-500 mt-2">
+          <footer className="text-center text-xs text-gray-500 dark:text-gray-400 mt-2">
             Nunto AI может допускать ошибки. Проверяйте важную информацию.
           </footer>
         </section>
@@ -81,7 +77,9 @@ export default function ChatComponent({
       {!chatId && isAuthenticated && (
         <MessageCircleIcon
           className={`cursor-pointer absolute top-5 right-5 ${
-            isTemporary ? "text-blue-500" : "text-black"
+            isTemporary
+              ? "text-blue-500 dark:text-blue-400"
+              : "text-black dark:text-white"
           } size-6`}
           onClick={toggleTemporary}
         />
