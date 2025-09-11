@@ -22,6 +22,7 @@ import AppSidebarPopover from "./popover";
 import { usePinnedChatsStore } from "@/store/pinned-chats-store";
 import SearchModal from "../search/search-modal";
 import { SettingsModal } from "../settings/settings-modal";
+import LogotypeNunto from "../logotype-nunto";
 
 export function AppSidebar({ chats }: { chats?: Chat[] }) {
   const [openProfileModal, setOpenProfileModal] = useState(false);
@@ -53,12 +54,7 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
   return (
     <Sidebar collapsible="icon" className="group/sidebar py-4">
       <SidebarHeader className="px-3 py-2 mb-5">
-        <div className="flex gap-2 items-center">
-          <TvIcon className="size-6 shrink-0" />
-          <span className={cn("shrink-0", isCollapsed && "hidden")}> 
-            Nunto AI
-          </span>
-        </div>
+        <LogotypeNunto isCollapsed={isCollapsed} />
       </SidebarHeader>
 
       <SidebarContent className="px-2">

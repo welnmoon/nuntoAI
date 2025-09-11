@@ -44,8 +44,13 @@ const ChatMessages = ({
                 ? "bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-gray-100"
                 : "bg-white dark:bg-neutral-900 text-gray-800 dark:text-gray-100"
             }`}
+            style={{
+              backgroundColor: "color-mix(in srgb, var(--accent) 10%, white)",
+            }}
           >
-            {loading && m.role === MessageRole.ASSISTANT && i === combined.length - 1 ? (
+            {loading &&
+            m.role === MessageRole.ASSISTANT &&
+            i === combined.length - 1 ? (
               <BeatLoader size={5} color="#ffffff" />
             ) : (
               <ReactMarkdown

@@ -39,7 +39,8 @@ const LoginForm = () => {
     } else {
       toast.success("Вы успешно вошли в систему!");
       setLoading(false);
-      router.push(CLIENT_ROUTES.home);
+      router.replace(CLIENT_ROUTES.home);
+      router.refresh();
     }
   };
   return (

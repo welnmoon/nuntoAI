@@ -2,7 +2,7 @@
 "use client";
 
 import { Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider, useSession } from "next-auth/react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { GlobalSidebarToggle } from "@/components/global-sidebar-toggle";
@@ -20,22 +20,36 @@ export function Providers({
   session?: Session | null;
   chats?: Chat[];
 }) {
-  const isAuthenticated = !!session?.user;
   return (
     <SessionProvider session={session}>
       <ThemeProviders>
-        {isAuthenticated ? (
-          <SidebarProvider className="bg-gray-50 dark:bg-gray-900" defaultOpen>
-            {/* Глобальная кнопка — всегда в левом верхнем углу */}
-            <GlobalSidebarToggle />
-            <AppSidebar chats={chats} />
-
-            <SidebarInset>{children}</SidebarInset>
-          </SidebarProvider>
-        ) : (
-          <div>{children}</div>
-        )}
+        <AuthGate chats={chats}>{children}</AuthGate>
       </ThemeProviders>
     </SessionProvider>
+  );
+}
+
+function AuthGate({
+  children,
+  chats,
+}: {
+  children: React.ReactNode;
+  chats?: Chat[];
+}) {
+  const { data: clientSession, status } = useSession();
+  const isAuthenticated = !!clientSession?.user;
+
+  if (status === "loading") {
+    return <div>{children}</div>;
+  }
+
+  return isAuthenticated ? (
+    <SidebarProvider className="bg-gray-50 dark:bg-gray-900" defaultOpen>
+      <GlobalSidebarToggle />
+      <AppSidebar chats={chats} />
+      <SidebarInset>{children}</SidebarInset>
+    </SidebarProvider>
+  ) : (
+    <div>{children}</div>
   );
 }
