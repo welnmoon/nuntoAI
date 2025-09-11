@@ -81,7 +81,7 @@ const SearchInput = ({
         aria-label="Поиск"
         className={cn(
           // твои базовые стили из примера
-          "bg-gray-200 w-full rounded-md h-7",
+          "bg-gray-200 dark:bg-neutral-800 dark:text-white w-full rounded-md h-7",
           // отступы под иконки
           "pl-8 pr-7",
           // фокус и доступность

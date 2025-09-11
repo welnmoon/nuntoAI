@@ -136,7 +136,11 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
         setSettingsModalOpen={setSettingsModalOpen}
         trigger={
           <SidebarFooter>
-            <div className="flex items-center gap-2 cursor-pointer px-0 py-1 hover:bg-muted rounded-md transition-colors">
+            <div
+              className={`flex items-center transition-all duration-200 gap-2 cursor-pointer py-1 hover:bg-muted rounded-md ${
+                isCollapsed && "pl-2  "
+              }`}
+            >
               <UserCircle className="size-7 shrink-0" />
               <span
                 className={cn(
