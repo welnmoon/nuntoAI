@@ -24,7 +24,7 @@ const ChatPage = async ({
     where: { id: numericId },
   });
 
-  if (session.user.id !== chat?.userId) {
+  if (Number(session.user.id) !== chat?.userId) {
     return (
       <div className="text-center mt-10">У вас нет доступа к этому чату</div>
     );
