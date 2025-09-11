@@ -10,6 +10,13 @@
   --accent: #3b82f6;
 }
 
+:root {
+  --accent-bg: color-mix(in srgb, var(--accent) 10%, white);
+}
+.dark {
+  --accent-bg: color-mix(in srgb, var(--accent) 10%, black);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
