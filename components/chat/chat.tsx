@@ -33,6 +33,7 @@ export default function ChatComponent({
   } = useChatController({ chat, initialMessages });
   const session = useSession();
   const isAuthenticated = !!session.data?.user;
+
   return (
     <main className="min-h-screen flex flex-col w-[90%] md:w-1/2 max-w-[700px] mx-auto">
       {messages.length > 0 ? (
@@ -46,8 +47,17 @@ export default function ChatComponent({
         <section className="flex-1 grid place-items-center px-4">
           <div>
             <Heading className="w-100 text-center mb-5" level={2}>
-              Добро пожаловать в Nunto AI, {userName}
+              {isTemporary
+                ? "Временный чат"
+                : `Добро пожаловать в Nunto AI, ${userName}`}
             </Heading>
+            {isTemporary && (
+              <p className="text-center w-100 text-gray-500 dark:text-gray-400 mb-10">
+                Этот чат не появится в журнале, не будет использовать или
+                обновлять память Nunto AI и не будет использоваться для обучения
+                наших моделей.
+              </p>
+            )}
             <SendToAIForm
               input={input}
               setInput={setInput}

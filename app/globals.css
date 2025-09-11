@@ -17,6 +17,7 @@
   --accent-bg: color-mix(in srgb, var(--accent) 10%, black);
 }
 
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
