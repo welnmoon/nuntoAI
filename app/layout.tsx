@@ -2,6 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { AccentColorApplier } from "@/components/accent-color-applier";
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+  variable: "--font-geist-sans",
+});
 
 export const metadata: Metadata = {
   title: "Nunto AI",
@@ -15,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body className={``}>
+      <body className={`${inter.variable} font-sans m-0 p-0`}>
         <Toaster position="top-right" />
         <AccentColorApplier />
         {children}
