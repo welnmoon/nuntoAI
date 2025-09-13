@@ -1,6 +1,4 @@
 "use client";
-import Image from "next/image";
-
 export default function TrustedBy() {
   const logos = [
     { name: "Google", url: "https://cdn.simpleicons.org/google/9ca3af" },
@@ -22,13 +20,11 @@ export default function TrustedBy() {
       </h2>
       <div className="mt-8 grid grid-cols-5 lg:flex flex-wrap items-center justify-center gap-10">
         {logos.map((logo) => (
-          <Image
+          <img
             key={logo.name}
             src={logo.url}
             alt={logo.name}
-            width={64}
-            height={64}
-            className="h-10 w-auto opacity-70 lg:mx-0 mx-auto hover:opacity-100 transition"
+            className="h-15 opacity-70 lg:mx-0 mx-auto hover:opacity-100 transition "
           />
         ))}
       </div>
