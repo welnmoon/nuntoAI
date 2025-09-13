@@ -16,7 +16,7 @@ const LogotypeNunto = ({
       </div>
       <span
         className={cn(
-          "shrink-0 text-lg font-semibold tracking-tight  bg-clip-text text-transparent",
+          "shrink-0  text-lg font-semibold tracking-tight  bg-clip-text text-transparent",
           isCollapsed && "hidden",
           textStyle
             ? textStyle

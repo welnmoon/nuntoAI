@@ -54,7 +54,12 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
   return (
     <Sidebar collapsible="icon" className="group/sidebar py-4">
       <SidebarHeader className="px-3 py-2 mb-5">
-        <LogotypeNunto isCollapsed={isCollapsed} />
+        <LogotypeNunto
+          textStyle={
+            "dark:bg-gradient-to-r dark:from-neutral-400 dark:to-neutral-200 bg-gradient-to-r from-neutral-900 to-neutral-600"
+          }
+          isCollapsed={isCollapsed}
+        />
       </SidebarHeader>
 
       <SidebarContent className="px-2">

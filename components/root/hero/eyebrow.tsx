@@ -1,6 +1,6 @@
 const Eyebrow = () => {
   return (
-    <div className="text-center items-center flex gap-2 border border-gray-500 rounded-3xl w-fit px-3 py-2 mb-4">
+    <div className="text-center items-center flex gap-2 border border-gray-500 rounded-3xl w-fit px-3 py-2 mb-4 mx-auto md:mx-0">
       <span className="w-5 text-center border border-gray-500 rounded-md text-gray-400">
         /
       </span>

@@ -1,5 +1,6 @@
 import Header from "@/components/root/header/header";
 import Hero from "@/components/root/hero/hero";
+import TrustedBy from "@/components/root/trusted-by";
 
 const RootPage = () => {
   return (
@@ -17,6 +18,7 @@ const RootPage = () => {
       <Header />
       {/*hero*/}
       <Hero />
+      <TrustedBy />
     </div>
   );
 };

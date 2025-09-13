@@ -35,7 +35,7 @@ export default function ChatComponent({
   const isAuthenticated = !!session.data?.user;
 
   return (
-    <main className="min-h-screen flex flex-col w-[90%] md:w-1/2 max-w-[700px] mx-auto">
+    <main className=" min-h-screen flex flex-col w-[90%] md:w-1/2 max-w-[700px] mx-auto">
       {messages.length > 0 ? (
         <ChatMessages
           messages={messages}

@@ -20,9 +20,8 @@ const HeroRightSide = () => {
   const typed = useMemo(() => promptText.slice(0, i), [i]);
 
   return (
-    <div className="w-full !text-left md:w-1/2 md:self-stretch">
+    <div className="w-full md:w-1/2 text-left mt-8 md:mt-0">
       <div className="relative rounded-2xl border border-white/10 bg-black/40 text-white shadow-[0_0_0_1px_rgba(255,255,255,.05)]">
-        {/* window controls */}
         <div className="flex gap-2 p-3">
           <span className="size-2 rounded-full bg-red-400/80" />
           <span className="size-2 rounded-full bg-yellow-400/80" />
