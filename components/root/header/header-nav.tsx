@@ -2,15 +2,25 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { headerNav } from "@/constants/header-nav";
+import { useEffect, useState } from "react";
 
 const HeaderNav = () => {
   const pathname = usePathname();
+  const [hash, setHash] = useState<string>("");
+
+  useEffect(() => {
+    const update = () => setHash(window.location.hash || "");
+    update();
+    window.addEventListener("hashchange", update);
+    return () => window.removeEventListener("hashchange", update);
+  }, []);
 
   return (
     <nav className="hidden lg:flex gap-1">
       {headerNav.map((item) => {
-        const active =
-          pathname === item.href || pathname.startsWith(item.href + "/");
+        const active = item.href.startsWith("#")
+          ? hash === item.href
+          : pathname === item.href || pathname.startsWith(item.href + "/");
         return (
           <Link
             key={item.href}

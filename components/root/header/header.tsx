@@ -2,7 +2,6 @@ import LogotypeNunto from "@/components/logotype-nunto";
 import HeaderNav from "./header-nav";
 import MainContainer from "../container/main-container";
 import HeaderLogInBtn from "../buttons/header-log-in-btn";
-import Hero from "../hero/hero";
 
 const Header = () => {
   return (

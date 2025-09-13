@@ -1,6 +1,10 @@
 import Header from "@/components/root/header/header";
 import Hero from "@/components/root/hero/hero";
 import TrustedBy from "@/components/root/trusted-by";
+import Scenarios from "@/components/root/scenarios";
+import Benefits from "@/components/root/benefits";
+import Prices from "@/components/root/prices/prices";
+import FAQ from "@/components/root/faq";
 
 const RootPage = () => {
   return (
@@ -19,6 +23,10 @@ const RootPage = () => {
       {/*hero*/}
       <Hero />
       <TrustedBy />
+      <Scenarios />
+      <Benefits />
+      <Prices />
+      <FAQ />
     </div>
   );
 };

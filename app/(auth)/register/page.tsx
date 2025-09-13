@@ -1,5 +1,5 @@
 "use server";
-import RegisterForm from "@/components/form/register/register-form";
+import AuthSwitcher from "@/components/auth/auth-switcher";
 import { CLIENT_ROUTES } from "@/lib/client-routes";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -10,11 +10,7 @@ const RegisterPage = async () => {
   if (session) {
     redirect(CLIENT_ROUTES.home);
   }
-  return (
-    <div className="bg-gray-100 dark:bg-neutral-900 min-h-screen flex items-center justify-center">
-      <RegisterForm />
-    </div>
-  );
+  return <AuthSwitcher initial="register" />;
 };
 
 export default RegisterPage;

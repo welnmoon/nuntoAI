@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { CLIENT_ROUTES } from "@/lib/client-routes";
 import { useState } from "react";
 
-const RegisterForm = () => {
+const RegisterForm = ({ onToggle }: { onToggle?: () => void }) => {
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(registerSchema),
@@ -72,10 +72,11 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className="w-[300px] bg-white dark:bg-neutral-800 p-6 rounded-xl">
-      <Heading level={2} className="mb-4">
-        Регистрация
+    <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6 text-white shadow-[0_0_0_1px_rgba(255,255,255,.06)]">
+      <Heading level={2} className="mb-1 text-white">
+        Создать аккаунт
       </Heading>
+      <p className="mb-4 text-sm text-gray-300">Пара минут — и можно начинать</p>
       <FormProvider {...form}>
         <form
           onSubmit={form.handleSubmit(onRegisterSubmit)}
@@ -100,14 +101,21 @@ const RegisterForm = () => {
           />
         </form>
       </FormProvider>
-      <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+      <p className="mt-4 text-sm text-gray-300 text-center">
         Уже зарегистрированы?{" "}
-        <a
-          href="/login"
-          className="text-blue-500 dark:text-blue-400 hover:underline"
-        >
-          Войти
-        </a>
+        {onToggle ? (
+          <button
+            type="button"
+            onClick={onToggle}
+            className="text-cyan-400 hover:underline"
+          >
+            Войти
+          </button>
+        ) : (
+          <a href="/login" className="text-cyan-400 hover:underline">
+            Войти
+          </a>
+        )}
       </p>
     </div>
   );

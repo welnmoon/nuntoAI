@@ -1,7 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import { LogInIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
+
+import { ProfilePopover } from "../header/profile-popover";
 
 const HeaderLogInBtn = () => {
+  const session = useSession();
+  const isAuthenticated = session.status === "authenticated";
+
+  if (isAuthenticated) {
+    return <ProfilePopover isAuthenticated={isAuthenticated} />;
+  }
   return (
     <Link
       href="/login"

@@ -2,13 +2,11 @@
 "use client";
 
 import { Session } from "next-auth";
-import { SessionProvider, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { GlobalSidebarToggle } from "@/components/global-sidebar-toggle";
 import { Chat } from "@prisma/client";
-import { TvIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { ThemeProviders } from "./theme-provider";
 
 export function Providers({
@@ -21,11 +19,9 @@ export function Providers({
   chats?: Chat[];
 }) {
   return (
-    <SessionProvider session={session}>
-      <ThemeProviders>
-        <AuthGate chats={chats}>{children}</AuthGate>
-      </ThemeProviders>
-    </SessionProvider>
+    <ThemeProviders>
+      <AuthGate chats={chats}>{children}</AuthGate>
+    </ThemeProviders>
   );
 }
 
