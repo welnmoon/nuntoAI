@@ -1,7 +1,20 @@
 "use client";
+import { CopyButton } from "@/components/copy-button";
+import ToolTip from "@/components/tooltip";
 import { useEffect, useMemo, useState } from "react";
 
 const promptText = "Сгенерируй слоган для Nunto AI";
+
+const code = `import { createClient } from 'nunto-ai'
+
+const ai = createClient({ apiKey: process.env.NUNTO_API_KEY })
+
+async function main() {
+  const res = await ai.chat.ask("Сгенерируй слоган для Nunto AI")
+  console.log(res.text)
+}
+
+main()`;
 
 const HeroRightSide = () => {
   const [i, setI] = useState(0);
@@ -22,6 +35,9 @@ const HeroRightSide = () => {
   return (
     <div className="w-full md:w-1/2 text-left mt-8 md:mt-0">
       <div className="relative rounded-2xl border border-white/10 bg-black/40 text-white shadow-[0_0_0_1px_rgba(255,255,255,.05)]">
+        <ToolTip>
+          <CopyButton text={code} />
+        </ToolTip>
         <div className="flex gap-2 p-3">
           <span className="size-2 rounded-full bg-red-400/80" />
           <span className="size-2 rounded-full bg-yellow-400/80" />
