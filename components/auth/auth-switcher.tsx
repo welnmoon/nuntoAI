@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import LoginForm from "@/components/form/login/login-form";
 import RegisterForm from "@/components/form/register/register-form";
@@ -13,10 +13,6 @@ export default function AuthSwitcher({ initial = "login" as Mode }) {
     setMode(initial);
   }, [initial]);
 
-  const title = useMemo(
-    () => (mode === "login" ? "Вход" : "Регистрация"),
-    [mode]
-  );
 
   return (
     <div

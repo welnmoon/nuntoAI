@@ -1,6 +1,5 @@
 "use client";
 import { Forward, LoaderCircle } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 

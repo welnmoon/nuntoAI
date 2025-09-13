@@ -26,7 +26,7 @@ export default async function HomeLayout({
   return (
     <html lang="ru">
       <body>
-        <Providers chats={chats} session={session}>
+        <Providers chats={chats}>
           <AccentColorApplier />
           {children}
         </Providers>

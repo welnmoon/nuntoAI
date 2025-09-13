@@ -8,7 +8,7 @@ import Heading from "@/components/headers/heading";
 import { loginSchema } from "./loginSchema";
 import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { CLIENT_ROUTES } from "@/lib/client-routes";
 import { useState } from "react";
 

@@ -4,8 +4,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import Link from "next/link";
-import { User, LogIn, LogOut } from "lucide-react";
-import { Session } from "next-auth";
+import { User, LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 import toast from "react-hot-toast";
 

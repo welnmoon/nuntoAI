@@ -1,7 +1,6 @@
 // components/providers/Providers.tsx
 "use client";
 
-import { Session } from "next-auth";
 import { useSession } from "next-auth/react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
@@ -11,11 +10,11 @@ import { ThemeProviders } from "./theme-provider";
 
 export function Providers({
   children,
-  session,
+
   chats,
 }: {
   children: React.ReactNode;
-  session?: Session | null;
+
   chats?: Chat[];
 }) {
   return (

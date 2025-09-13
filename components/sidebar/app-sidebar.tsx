@@ -10,7 +10,7 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { MessagesSquare, Search, TvIcon, UserCircle } from "lucide-react";
+import { MessagesSquare, Search, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Chat } from "@prisma/client";
 import { CLIENT_ROUTES } from "@/lib/client-routes";

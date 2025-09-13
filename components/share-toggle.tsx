@@ -69,7 +69,7 @@ export function ShareToggle({
                   toast.success("Ссылка скопирована в буфер обмена", {
                     position: "top-left",
                   });
-                } catch (e) {
+                } catch {
                   toast.error("Не удалось скопировать ссылку", {
                     position: "top-left",
                   });

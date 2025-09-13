@@ -32,7 +32,7 @@ const HeroRightSide = () => {
             <span className="token keyword">import</span>
             {" { createClient } "}
             <span className="token keyword">from</span>{" "}
-            <span className="token string">'nunto-ai'</span>
+            <span className="token string">&apos;nunto-ai&apos;</span>
             {"\n"}
             <span className="token keyword">const</span> ai{" "}
             <span className="token operator">=</span> createClient(
@@ -49,10 +49,10 @@ const HeroRightSide = () => {
             </span>
             {""}
             <span className="token keyword">await</span> ai.chat.ask(
-            <span className="token string">"</span>
+            <span className="token string">&quot;</span>
             <span className="text-cyan-200/90">{typed}</span>
             <span className={`typing-caret ${done ? "opacity-0" : ""}`} />
-            <span className="token string">"</span>)
+            <span className="token string">&quot;</span>)
             {"\n  console.log(res.text)\n"}
             {"}"}
             {"\n\n"}

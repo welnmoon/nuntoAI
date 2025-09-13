@@ -3,7 +3,6 @@ import {
   DialogContent,
   DialogOverlay,
   DialogPortal,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import { Chat } from "@prisma/client";
 import Link from "next/link";
