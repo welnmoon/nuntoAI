@@ -4,4 +4,5 @@ export const CLIENT_ROUTES = {
   login: "/login",
   chat: "/home/chat/",
   profile: "/profile",
+  docs: "/docs",
 };
