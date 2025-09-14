@@ -1,0 +1,23 @@
+---
+title: "Route Handlers (API в App Router)"
+description: "app/api/route.ts, методы, ответы"
+---
+
+# Route Handlers (API в App Router)
+
+Файлы в `app/api/**/route.ts`/`route.tsx` экспортируют HTTP-методы.
+
+```ts
+// app/api/hello/route.ts
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  return NextResponse.json({ ok: true });
+}
+
+export async function POST(req: Request) {
+  const data = await req.json();
+  return NextResponse.json({ received: data });
+}
+```
+

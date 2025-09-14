@@ -1,0 +1,35 @@
+---
+title: "Серверные и клиентские компоненты"
+description: "'use client', когда что использовать, Server Actions"
+---
+
+# Серверные и клиентские компоненты
+
+По умолчанию компоненты — серверные. Чтобы использовать состояние/эффекты/события, пометьте файл директивой `'use client'`.
+
+```tsx
+// components/counter.tsx
+'use client';
+import { useState } from 'react';
+
+export default function Counter() {
+  const [n, setN] = useState(0);
+  return <button onClick={() => setN((v) => v + 1)}>{n}</button>;
+}
+```
+
+Серверные компоненты могут безопасно читать секреты и обращаться к базе, но не имеют доступа к браузерному API.
+
+## Server Actions (кратко)
+
+```tsx
+// app/form/page.tsx
+export default function Page() {
+  async function action(formData: FormData) {
+    'use server';
+    // серверная логика
+  }
+  return <form action={action}>{/* поля */}</form>;
+}
+```
+

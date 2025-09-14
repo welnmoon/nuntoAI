@@ -1,0 +1,52 @@
+---
+title: "Маршрутизация (App Router)"
+description: "Структура папок app/, динамические маршруты, layout и состояния"
+---
+
+# Маршрутизация (App Router)
+
+App Router использует файловую систему папки `app/` для определения маршрутов.
+
+## Базовые правила
+
+- `app/page.tsx` → маршрут `/`
+- `app/docs/page.tsx` → маршрут `/docs`
+- Вложенные папки создают вложенные маршруты.
+
+```tsx
+// app/about/page.tsx
+export default function AboutPage() {
+  return <h1>About</h1>;
+}
+```
+
+## Динамические сегменты
+
+Имя папки в квадратных скобках образует динамический параметр.
+
+```tsx
+// app/blog/[slug]/page.tsx
+export default function Post({ params }: { params: { slug: string } }) {
+  return <h1>Post: {params.slug}</h1>;
+}
+```
+
+## Layout и состояния
+
+- `layout.tsx` — общий каркас для всех дочерних маршрутов.
+- `loading.tsx` — состояние загрузки.
+- `error.tsx` — обработчик ошибок.
+- `not-found.tsx` — 404 для ветки маршрутов.
+
+```tsx
+// app/blog/layout.tsx
+export default function BlogLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <section>
+      <h2>Блог</h2>
+      {children}
+    </section>
+  );
+}
+```
+

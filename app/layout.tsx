@@ -6,6 +6,7 @@ import { Inter } from "next/font/google";
 import SessionClientProvider from "@/components/providers/session-client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import "fumadocs-ui/style.css";
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],

@@ -1,0 +1,10 @@
+title: "Next.js — основы"
+pages:
+  - app-router
+  - data-fetching
+  - server-client
+  - metadata
+  - images
+  - route-handlers
+  - middleware
+

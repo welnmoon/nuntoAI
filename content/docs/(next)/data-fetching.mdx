@@ -1,0 +1,39 @@
+---
+title: "Загрузка данных и кеш"
+description: "fetch в серверных компонентах, кеширование, ISR и revalidate"
+---
+
+# Загрузка данных и кеш
+
+В серверных компонентах можно использовать `await fetch(...)` прямо в компоненте.
+
+```tsx
+// app/users/page.tsx
+export default async function Users() {
+  const res = await fetch('https://api.example.com/users', {
+    next: { revalidate: 60 }, // ISR: обновлять кеш каждые 60 сек
+  });
+  const users = await res.json();
+  return <pre>{JSON.stringify(users, null, 2)}</pre>;
+}
+```
+
+## Управление кешем
+
+- `cache: 'no-store'` — всегда получать свежие данные.
+- `next: { revalidate: N }` — инкрементальная статическая генерация.
+
+```tsx
+await fetch(url, { cache: 'no-store' });
+await fetch(url, { next: { revalidate: 300 } });
+```
+
+## Глобальная стратегия
+
+Можно объявить `export const revalidate = 60;` в файле маршрута — применится ко всем вложенным `fetch` без собственного `revalidate`.
+
+```tsx
+// app/page.tsx
+export const revalidate = 120;
+```
+

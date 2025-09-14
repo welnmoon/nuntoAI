@@ -1,0 +1,25 @@
+---
+title: "Изображения (next/image)"
+description: "Компонент Image, внешние домены, оптимизация"
+---
+
+# Изображения (next/image)
+
+```tsx
+import Image from 'next/image';
+
+export default function Logo() {
+  return <Image src="/logo.png" alt="Logo" width={120} height={40} priority />;
+}
+```
+
+## Внешние источники
+
+Разрешите домены в `next.config.ts` → `images.remotePatterns`.
+
+```ts
+images: {
+  remotePatterns: [{ protocol: 'https', hostname: 'cdn.example.com' }],
+}
+```
+

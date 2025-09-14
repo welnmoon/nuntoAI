@@ -1,0 +1,27 @@
+---
+title: "Middleware"
+description: "Перехват запросов, редиректы, локали"
+---
+
+# Middleware
+
+`middleware.ts` в корне проекта позволяет перехватывать запросы и делать редиректы/локализацию.
+
+```ts
+// middleware.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export function middleware(req: NextRequest) {
+  // пример: редирект со старого пути
+  if (req.nextUrl.pathname === '/old') {
+    return NextResponse.redirect(new URL('/new', req.url));
+  }
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ['/((?!_next|.*\..*).*)'], // на какие пути действует
+};
+```
+

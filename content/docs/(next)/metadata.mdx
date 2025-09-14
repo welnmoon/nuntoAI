@@ -1,0 +1,26 @@
+---
+title: "Метаданные и Open Graph"
+description: "metadata, generateMetadata, OG-изображения"
+---
+
+# Метаданные и Open Graph
+
+## Статические метаданные
+
+```tsx
+// app/page.tsx
+export const metadata = {
+  title: 'Главная',
+  description: 'Описание страницы',
+};
+```
+
+## Динамические метаданные
+
+```tsx
+// app/blog/[slug]/page.tsx
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  return { title: `Пост: ${params.slug}` };
+}
+```
+
