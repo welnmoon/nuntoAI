@@ -9,23 +9,26 @@ import {
 } from "fumadocs-ui/page";
 import { getMDXComponents } from "@/lib/mdx-components";
 
-type Props = { params: { slug?: string[] } };
+type SlugParams = { slug?: string[] };
 
-export default function DocPage({ params }: Props) {
-  const slugs = params.slug ?? ["index"];
-
-  // Временная диагностика — смотри вывод в серверной консоли:
-  console.log(
-    "Available pages:",
-    source.getPages().map((p) => p.slugs.join("/"))
-  );
+export default async function DocPage({
+  params,
+}: {
+  params: Promise<SlugParams>;
+}) {
+  // ← в Next 15 params — это Promise
+  const { slug } = await params;
+  const slugs = slug ?? ["index"];
 
   const page =
-    source.getPage(slugs) || source.getPage(["index"]) || source.getPages()[0]; // фоллбек на первую попавшуюся страницу
+    source.getPage(slugs) ||
+    source.getPage(["index"]) ||
+    source.getPages()[0];
 
   if (!page) return notFound();
 
   const MDX = page.data.body;
+
   return (
     <DocsPage toc={page.data.toc}>
       <DocsTitle>{page.data.title}</DocsTitle>
