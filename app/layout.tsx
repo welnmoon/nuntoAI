@@ -6,7 +6,7 @@ import { Inter } from "next/font/google";
 import SessionClientProvider from "@/components/providers/session-client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import "fumadocs-ui/style.css";
+import { RootProvider } from "fumadocs-ui/provider";
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
@@ -28,11 +28,13 @@ export default async function RootLayout({
   return (
     <html lang="ru">
       <body className={`${inter.variable} font-sans m-0 p-0`}>
-        <SessionClientProvider session={session}>
-          <Toaster position="top-right" />
-          <AccentColorApplier />
-          {children}
-        </SessionClientProvider>
+        <RootProvider>
+          <SessionClientProvider session={session}>
+            <Toaster position="top-right" />
+            <AccentColorApplier />
+            {children}
+          </SessionClientProvider>
+        </RootProvider>
       </body>
     </html>
   );

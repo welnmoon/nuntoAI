@@ -1,40 +1,40 @@
-import { source } from "@/lib/source";
+// app/docs/[[...slug]]/page.tsx
 import { notFound } from "next/navigation";
-import { getTableOfContents } from "fumadocs-core/server";
+import { source } from "@/lib/source";
+import {
+  DocsPage,
+  DocsBody,
+  DocsTitle,
+  DocsDescription,
+} from "fumadocs-ui/page";
+import { getMDXComponents } from "@/lib/mdx-components";
 
-export function generateStaticParams() {
-  return source.generateParams("slug");
-}
+type Props = { params: { slug?: string[] } };
 
-export default async function DocPage({
-  params,
-}: {
-  params: { slug?: string[] };
-}) {
-  const slugs = params.slug ?? [];
-  const page = source.getPage(slugs);
+export default function DocPage({ params }: Props) {
+  const slugs = params.slug ?? ["index"];
+
+  // Временная диагностика — смотри вывод в серверной консоли:
+  console.log(
+    "Available pages:",
+    source.getPages().map((p) => p.slugs.join("/"))
+  );
+
+  const page =
+    source.getPage(slugs) || source.getPage(["index"]) || source.getPages()[0]; // фоллбек на первую попавшуюся страницу
+
   if (!page) return notFound();
 
-  const Body = page.data.body as React.ComponentType;
-  const toc = await getTableOfContents(page.data.content);
-
+  const MDX = page.data.body;
   return (
-    <article className="prose prose-zinc dark:prose-invert max-w-none">
-      {toc.length > 0 && (
-        <nav aria-label="Содержание" className="not-prose mb-6 rounded-md border border-zinc-200 dark:border-zinc-800 p-4 bg-zinc-50 dark:bg-zinc-900">
-          <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2">Содержание</div>
-          <ul className="m-0 list-none p-0">
-            {toc.map((item, idx) => (
-              <li key={idx} style={{ paddingLeft: (item.depth - 1) * 12 }}>
-                <a href={item.url} className="text-sm text-zinc-700 dark:text-zinc-300 hover:underline">
-                  {item.title as any}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
-      <Body />
-    </article>
+    <DocsPage toc={page.data.toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      {page.data.description ? (
+        <DocsDescription>{page.data.description}</DocsDescription>
+      ) : null}
+      <DocsBody>
+        <MDX components={getMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
   );
 }

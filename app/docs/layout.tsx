@@ -1,5 +1,13 @@
-import type { ReactNode } from "react";
+// app/docs/layout.tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
 
-export default function DocsLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout tree={source.pageTree} {...baseOptions()}>
+      {children}
+    </DocsLayout>
+  );
 }

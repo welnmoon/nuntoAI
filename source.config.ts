@@ -1,13 +1,8 @@
-import { defineDocs, defineConfig } from 'fumadocs-mdx/config';
-import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
+// source.config.ts
+import { defineDocs, defineConfig } from "fumadocs-mdx/config";
 
 export const docs = defineDocs({
-  dir: 'content/docs',
-  mdxOptions: {
-    remarkPlugins: [remarkGfm],
-    rehypePlugins: [rehypeHighlight],
-  },
+  dir: "content/docs", 
 });
 
 export default defineConfig();
