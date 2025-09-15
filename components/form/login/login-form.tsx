@@ -34,7 +34,7 @@ const LoginForm = ({ onToggle }: { onToggle?: () => void }) => {
 
     if (login?.error) {
       toast.error(login.error);
-
+      setLoading(false);
       return;
     } else {
       toast.success("Вы успешно вошли в систему!");

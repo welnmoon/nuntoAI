@@ -16,7 +16,6 @@ export default async function DocPage({
 }: {
   params: Promise<SlugParams>;
 }) {
-  // ← в Next 15 params — это Promise
   const { slug } = await params;
   const slugs = slug ?? ["index"];
 

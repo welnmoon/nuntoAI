@@ -9,7 +9,7 @@ const LogotypeNunto = ({
   textStyle?: string;
 }) => {
   return (
-    <div className="flex items-center gap-2 select-none">
+    <div className="flex  items-center gap-2 select-none">
       <div className="relative grid place-items-center size-8 rounded-lg bg-[var(--accent-bg)] ring-1 ring-border text-primary transition-transform duration-200 hover:scale-[1.03]">
         <TvIcon className="size-4" />
         <span className="absolute -right-1 -top-1 size-2 rounded-full bg-[var(--accent)]" />
