@@ -24,13 +24,9 @@ export default async function HomeLayout({
     where: { userId: Number(session?.user?.id) },
   });
   return (
-    <html lang="ru">
-      <body>
-        <Providers chats={chats}>
-          <AccentColorApplier />
-          {children}
-        </Providers>
-      </body>
-    </html>
+    <Providers chats={chats}>
+      <AccentColorApplier />
+      {children}
+    </Providers>
   );
 }

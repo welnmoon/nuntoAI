@@ -16,7 +16,7 @@ const Hero = () => {
             <HeroRightSide />
           </div>
           <div className="mt-6 mb-6 flex flex-wrap gap-4 justify-center md:justify-start">
-            <Link target="_blank" href={CLIENT_ROUTES.home}>
+            <Link prefetch={false} target="_blank" href={CLIENT_ROUTES.home}>
               <MainBtn text="Попробовать" />
             </Link>
             <DocumentationBtn />

@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Tariffs {
-  FREE
-  PRO
-  ENTERPRISE
-}
-
 enum MessageRole {
   USER
   ASSISTANT
@@ -22,6 +16,90 @@ enum Visibility {
   PRIVATE
   SHARED
 }
+
+/* ===== Тарифы / Цены / Подписки ===== */
+
+model Tariff {
+  id          Int           @id @default(autoincrement())
+  slug        String        @unique                 // "free" | "pro" | "enterprise"
+  name        String
+  description String?
+  features    Json?                                  // параметры доступа (валидируй в коде)
+  active      Boolean       @default(true)
+  sortOrder   Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  prices        TariffPrice[]
+  subscriptions Subscription[]
+  users         User[]       @relation("UserTariff") // денормализация текущего тарифа пользователя (опционально)
+}
+
+model TariffPrice {
+  id            Int      @id @default(autoincrement())
+  tariff        Tariff   @relation(fields: [tariffId], references: [id], onDelete: Cascade)
+  tariffId      Int
+
+  stripePriceId String   @unique                     // price_xxx из Stripe (источник правды)
+  currency      String                               // "kzt"
+  unitAmount    Int                                   // минорные единицы: 4 990 ₸ -> 499000
+  interval      String?                               // "month" | "year" | "6months" | null (разовый)
+  active        Boolean  @default(true)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([tariffId, active])
+  @@index([currency, interval])
+}
+
+model Subscription {
+  id                    Int       @id @default(autoincrement())
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                Int
+  tariff                Tariff    @relation(fields: [tariffId], references: [id])
+  tariffId              Int
+
+  stripeCustomerId      String?                         // cus_xxx
+  stripeSubscriptionId  String?   @unique               // sub_xxx
+
+  status                String                           // "active" | "trialing" | "past_due" | "canceled" | "expired"
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
+  cancelAtPeriodEnd     Boolean    @default(false)
+
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  @@index([userId, status])
+  @@index([currentPeriodEnd])
+}
+
+model Payment {
+  id                     Int      @id @default(autoincrement())
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                 Int
+
+  amount                 Decimal  @db.Decimal(10, 2)    // KZT.xx (для отчётов/UI)
+  currency               String
+  status                 String                         // "SUCCEEDED" | "FAILED" | "PENDING"
+
+  stripeSessionId        String?   @unique               // cs_xxx (идемпотентность вебхуков)
+  stripePaymentIntentId  String?   @unique               // pi_xxx
+
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  @@index([userId, status])
+}
+
+model WebhookEvent {
+   id          String   @id            // = Stripe event.id
+  type        String
+  createdTs   DateTime @default(now())
+  processedTs DateTime?
+}
+
 
 model User {
   id       Int     @id @default(autoincrement())
@@ -35,39 +113,43 @@ model User {
   providerId        String?
   verificationToken VerificationToken[]
 
+  // Денормализация "текущего тарифа" (опционально, для быстрого чтения в UI)
+  tariffId Int?
+  tariff   Tariff? @relation("UserTariff", fields: [tariffId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chats   Chat[]
-  tariff  Tariffs  @default(FREE)
-  Payment Payment[]
+  chats        Chat[]
+  payments     Payment[]
+  subscriptions Subscription[]
 
   @@unique([provider, providerId])
 }
 
 model Chat {
-  id Int    @id @default(autoincrement())
-  title  String
+  id    Int    @id @default(autoincrement())
+  title String
 
   userId Int?
-  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   visibility Visibility @default(PRIVATE)
-  publicId    String?    @unique
-  
+  publicId   String?    @unique
+
   messages  Message[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Message {
-  id        Int         @id @default(autoincrement())
-  content   String @db.Text
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
   role      MessageRole
   chatId    Int
-  chat      Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model VerificationToken {
@@ -81,17 +163,4 @@ model VerificationToken {
   createdAt DateTime @default(now())
 
   @@index([expiresAt])
-}
-
-
-model Payment {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int  
-
-  amount    Decimal @db.Decimal(10, 2)
-  currency  String
-  status    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
