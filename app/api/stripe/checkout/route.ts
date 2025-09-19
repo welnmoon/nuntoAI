@@ -24,8 +24,23 @@ export async function POST(req: NextRequest) {
     }
 
     const price = tariff.prices[0];
-    
-    // Chekout session
+
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL ?? process.env.NEXT_PUBLIC_APP_URL;
+
+    if (!baseUrl) {
+      return NextResponse.json(
+        { error: "Base URL is not configured" },
+        { status: 500 }
+      );
+    }
+
+    const normalizedBaseUrl = baseUrl.startsWith("https")
+      ? baseUrl
+      : baseUrl.includes("localhost")
+      ? `http://${baseUrl}`
+      : `https://${baseUrl}`;
+
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [{ price: price.stripePriceId, quantity: 1 }],
@@ -34,11 +49,11 @@ export async function POST(req: NextRequest) {
         tariffId: tariff.id,
         tariffSlug: tariff.slug,
       },
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-failed`,
+      success_url: `${normalizedBaseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${normalizedBaseUrl}/payment-failed`,
     });
 
-    return NextResponse.json({ url: checkoutSession.url });
+    return NextResponse.json({ sessionId: checkoutSession.id });
   } catch (e: any) {
     console.error("checkout error", e);
     return NextResponse.json(

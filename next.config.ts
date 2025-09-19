@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   pageExtensions: ["md", "mdx", "ts", "tsx", "js", "jsx"],
   images: {
-    remotePatterns: [{ protocol: "https", hostname: "cdn.simpleicons.org" }],
+    domains: ["avatars.githubusercontent.com", "cdn.simpleicons.org"],
   },
 };
 

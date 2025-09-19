@@ -13,10 +13,10 @@
 }
 
 :root {
-  --accent-bg: color-mix(in srgb, var(--accent) 10%, white);
+  --accent-bg: color-mix(in srgb, var(--accent) 20%, white);
 }
 .dark {
-  --accent-bg: color-mix(in srgb, var(--accent) 10%, black);
+  --accent-bg: color-mix(in srgb, var(--accent) 20%, rgb(151, 151, 151));
 }
 
 html,

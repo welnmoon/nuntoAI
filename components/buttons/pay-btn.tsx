@@ -1,34 +1,39 @@
 "use client";
 import { useState } from "react";
+import { pay } from "@/lib/pay";
+import { LoaderCircle } from "lucide-react";
+
+type PayButtonProps = {
+  slug?: string;
+  interval?: string;
+  userId?: number;
+};
 
 export default function PayButton({
   slug = "pro",
   interval = "month",
   userId,
-}: {
-  slug?: string;
-  interval?: string;
-  userId?: number;
-}) {
+}: PayButtonProps) {
   const [loading, setLoading] = useState(false);
 
   return (
     <button
+      className="mt-6 w-full rounded-lg bg-zinc-800 opacity-80 px-4 py-2 text-white hover:bg-zinc-700 disabled:opacity-50 flex items-center justify-center"
       disabled={loading}
       onClick={async () => {
         setLoading(true);
-        const res = await fetch("/api/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ slug, interval, userId }),
-        });
-        const { url, error } = await res.json();
-        setLoading(false);
-        if (error) alert(error);
-        else window.location.href = url;
+        try {
+          await pay({ slug, interval, userId });
+        } catch (error: unknown) {
+          const message =
+            error instanceof Error ? error.message : "Не удалось начать оплату";
+          alert(message);
+        } finally {
+          setLoading(false);
+        }
       }}
     >
-      {loading ? "..." : "Купить"}
+      {loading ? <LoaderCircle className="animate-spin" /> : "Приобрести"}
     </button>
   );
 }

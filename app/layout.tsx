@@ -26,7 +26,12 @@ export default async function RootLayout({
 }>) {
   const session = await getServerSession(authOptions);
   return (
-    <html lang="ru">
+    <html
+      lang="ru"
+      className="light"
+      style={{ colorScheme: "light" }}
+      suppressHydrationWarning
+    >
       <body className={`${inter.variable} font-sans m-0 p-0`}>
         <RootProvider>
           <SessionClientProvider session={session}>

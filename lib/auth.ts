@@ -56,30 +56,43 @@ export const authOptions: AuthOptions = {
         }
         return {
           ...user,
-          name: user.fullName,
+          fullName: user.fullName ?? null,
           id: String(user.id),
         };
       },
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET, // для чего и обязательно ли? и откуда брать
+  secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: "jwt", // для чего? Можно ли выбрать что то другое или это лучше?
+    strategy: "jwt",
   },
   callbacks: {
     async jwt({ token, user }: { token: JWT; user?: User }) {
-      if (user) token.id = user.id;
+      if (user) {
+        token.id = user.id;
+        token.name = user.name ?? token.name;
+        token.fullName = user.name ?? null;
+      }
 
       if (!token.id && token.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: token.email },
         });
         token.id = dbUser?.id;
+        token.name = token.name ?? dbUser?.fullName ?? null;
+        token.fullName =
+          token.fullName ?? dbUser?.fullName ?? null;
       }
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       if (token?.id) session.user.id = token.id as string;
+      if (token?.name) session.user.name = token.name;
+      const fullName = token.fullName;
+      if (typeof fullName !== "undefined") {
+        session.user.fullName = fullName;
+      }
+      if (token?.email) session.user.email = token.email;
       return session;
     },
   },

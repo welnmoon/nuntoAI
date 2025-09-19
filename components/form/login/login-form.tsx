@@ -44,7 +44,7 @@ const LoginForm = ({ onToggle }: { onToggle?: () => void }) => {
     }
   };
   return (
-    <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6 text-white shadow-[0_0_0_1px_rgba(255,255,255,.06)]">
+    <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6 text-white shadow-[0_0_0_1px_rgba(255,255,255,.06)]">
       <Heading level={2} className="mb-1 text-white">
         Вход в аккаунт
       </Heading>

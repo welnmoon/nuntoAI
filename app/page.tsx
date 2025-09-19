@@ -6,7 +6,7 @@ import Benefits from "@/components/root/benefits";
 import Prices from "@/components/root/prices/prices";
 import FAQ from "@/components/root/faq";
 
-const RootPage = () => {
+export default function LandingPage() {
   return (
     <div
       className="min-h-screen p-0 m-0"
@@ -20,7 +20,6 @@ const RootPage = () => {
       }}
     >
       <Header />
-      {/*hero*/}
       <Hero />
       <TrustedBy />
       <Scenarios />
@@ -29,6 +28,4 @@ const RootPage = () => {
       <FAQ />
     </div>
   );
-};
-
-export default RootPage;
+}
