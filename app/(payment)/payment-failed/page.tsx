@@ -8,17 +8,17 @@ const gradientBackground = `
   #0f1226
 `;
 
-type Params = Promise<{ message?: string }>;
+type SearchParams = { message?: string | string[] };
 
-export default async function PaymentFailedPage({
-  params,
+export default function PaymentFailedPage({
+  searchParams,
 }: {
-  params: Params;
+  searchParams?: SearchParams;
 }) {
-  const searchParams = await params;
-
+  const raw = searchParams?.message;
   const errorMessage =
-    searchParams?.message ?? "Попробуйте ещё раз или используйте другую карту.";
+    (Array.isArray(raw) ? raw[0] : raw) ??
+    "Попробуйте ещё раз или используйте другую карту.";
 
   return (
     <main
