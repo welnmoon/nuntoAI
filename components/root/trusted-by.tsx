@@ -22,7 +22,8 @@ export default function TrustedBy() {
       </h2>
       <div className="mt-8 grid grid-cols-5 lg:flex flex-wrap items-center justify-center gap-10">
         {logos.map((logo) => (
-          <Image
+          // eslint-disable-next-line
+          <img
             key={logo.name}
             src={logo.url}
             alt={logo.name}
