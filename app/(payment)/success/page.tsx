@@ -9,13 +9,16 @@ const gradientBackground = `
 `;
 
 type SuccessPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     session_id?: string;
-  };
+  }>;
 };
 
-export default function PaymentSuccessPage({ searchParams }: SuccessPageProps) {
-  const sessionId = searchParams?.session_id;
+export default async function PaymentSuccessPage({
+  searchParams,
+}: SuccessPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const sessionId = resolvedSearchParams?.session_id;
 
   return (
     <main

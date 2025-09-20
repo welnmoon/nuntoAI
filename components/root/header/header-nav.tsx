@@ -5,7 +5,7 @@ import { headerNav } from "@/constants/header-nav";
 import { useEffect, useState } from "react";
 
 const HeaderNav = () => {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const [hash, setHash] = useState<string>("");
 
   useEffect(() => {

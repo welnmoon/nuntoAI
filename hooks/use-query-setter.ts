@@ -7,9 +7,13 @@ export function useQuerySetter() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  if (!pathname || !router || !searchParams) {
+    throw new Error("useQuerySetter must be used in a client component");
+  }
+
   return useCallback(
     (key: string, value: string | null, { replace = false } = {}) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams.toString() ?? ""); 
 
       if (value === null) params.delete(key);
       else params.set(key, value);

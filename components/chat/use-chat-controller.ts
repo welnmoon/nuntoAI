@@ -49,6 +49,11 @@ export function useChatController({
   const isAuth = !!session?.user;
   const pathName = usePathname();
   const searchParams = useSearchParams();
+
+  if (!pathName || !searchParams) {
+    throw new Error("useChatController must be used in a client component");
+  }
+
   const isTemporary = searchParams.get("temporary") === "true";
   const setQuery = useQuerySetter();
 
@@ -79,16 +84,18 @@ export function useChatController({
   }, [messages]);
 
   // отменяем активный стрим при размонтировании
-  useEffect(() => () => {
-    controllerRef.current?.abort();
-    controllerRef.current = null;
-  }, []);
+  useEffect(
+    () => () => {
+      controllerRef.current?.abort();
+      controllerRef.current = null;
+    },
+    []
+  );
 
   // Утилита: переключение временного режима через query-параметр
   const toggleTemporary = useMemo(
-    () =>
-      () =>
-        setQuery("temporary", isTemporary ? null : "true", { replace: true }),
+    () => () =>
+      setQuery("temporary", isTemporary ? null : "true", { replace: true }),
     [isTemporary, setQuery]
   );
 
@@ -197,20 +204,24 @@ export function useChatController({
       }
 
       // Стримим ответ ассистента и по мере прихода чанков обновляем последний месседж
-      const fullReply = await streamAI(userMsg.content, signal, (_chunk, full) => {
-        setMessages((prev) => {
-          const arr = [...prev];
-          const idx = arr.findIndex((m) => m.id === assistantMsg.id);
-          if (idx !== -1) {
-            arr[idx] = {
-              ...assistantMsg,
-              content: full,
-              chatId: currentChatId,
-            };
-          }
-          return arr;
-        });
-      });
+      const fullReply = await streamAI(
+        userMsg.content,
+        signal,
+        (_chunk, full) => {
+          setMessages((prev) => {
+            const arr = [...prev];
+            const idx = arr.findIndex((m) => m.id === assistantMsg.id);
+            if (idx !== -1) {
+              arr[idx] = {
+                ...assistantMsg,
+                content: full,
+                chatId: currentChatId,
+              };
+            }
+            return arr;
+          });
+        }
+      );
 
       // Сохраняем ответ ассистента в БД
       if (isAuth && currentChatId !== 0) {
