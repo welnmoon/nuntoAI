@@ -51,7 +51,7 @@ export const authOptions: AuthOptions = {
           throw new Error("Неверный пароль");
         }
 
-        if (!user.verified) {
+        if (!user.emailVerified) {
           throw new Error("Пользователь не верифицирован");
         }
         return {

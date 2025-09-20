@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { User } from "@prisma/client";
 
 const ProfileUserSection = ({ user }: { user: User }) => {
@@ -7,8 +8,8 @@ const ProfileUserSection = ({ user }: { user: User }) => {
         <h1 className="text-3xl font-bold mb-4">Профиль пользователя</h1>
         {user?.image ? (
           <div className="flex justify-center mb-4">
-            <img
-              src={user.image || ""}
+            <Image
+              src={user.image}
               alt={user.name || "User avatar"}
               width={80}
               height={80}

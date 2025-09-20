@@ -1,10 +1,7 @@
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-const ToolTip = ({ children }: { children: React.ReactNode }) => {
+import { ReactNode } from "react";
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
+
+const ToolTip = ({ children }: { children: ReactNode }) => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>{children}</TooltipTrigger>

@@ -1,6 +1,5 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import ProfileUserSection from "@/components/profile/profile-user-section";
 import { prisma } from "@/prisma/prisma-client";

@@ -54,10 +54,12 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ sessionId: checkoutSession.id });
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const message =
+      e instanceof Error ? e.message : "Unexpected checkout error";
     console.error("checkout error", e);
     return NextResponse.json(
-      { error: e.message ?? "Internal error" },
+      { error: message },
       { status: 500 }
     );
   }

@@ -24,8 +24,9 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(rawBody, sig, whSecret);
-  } catch (err: any) {
-    return new Response(`Invalid signature: ${err.message}`, { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown";
+    return new Response(`Invalid signature: ${message}`, { status: 400 });
   }
 
   try {
@@ -33,8 +34,6 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed": {
         const s = event.data.object as Stripe.Checkout.Session;
         const sessionId = s.id;
-        const _customerId = s.customer as string;
-        const _subscriptionId = s.subscription as string | null;
         const amount = s.amount_total ?? 0;
         const currency = s.currency ?? "kzt";
         const userId = s.client_reference_id
