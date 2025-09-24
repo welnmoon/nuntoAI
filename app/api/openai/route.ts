@@ -1,3 +1,6 @@
+import { MESSAGE_LENGTH_LIMIT } from "@/constants/message-limit";
+import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -11,6 +14,10 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user.id) {
+    return NextResponse.json({ error: "Not Auth" }, { status: 401 });
+  }
   try {
     const { message } = await req.json();
     if (!message || typeof message !== "string") {
@@ -19,11 +26,18 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
+    if (message.trim().length > MESSAGE_LENGTH_LIMIT) {
+      return NextResponse.json(
+        {
+          error: `Message exceeds length limit of ${MESSAGE_LENGTH_LIMIT} characters.`,
+        },
+        { status: 400 }
+      );
+    }
     // При необходимости можно получить userId через getServerSession
 
     const completion = await openai.chat.completions.create({
-      model: "openai/gpt-4o",
+      model: "x-ai/grok-4-fast:free",
       messages: [{ role: "user", content: message }],
       max_tokens: 512,
       stream: true,
@@ -50,7 +64,7 @@ export async function POST(req: Request) {
 
     return new NextResponse(stream, {
       headers: {
-        "Content-Type": "application/octet-stream; charset=utf-8", 
+        "Content-Type": "application/octet-stream; charset=utf-8",
       },
     });
   } catch (error) {

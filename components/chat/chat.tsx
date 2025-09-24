@@ -8,6 +8,8 @@ import { Chat, Message } from "@prisma/client";
 import { useChatController } from "./use-chat-controller";
 import { useSession } from "next-auth/react";
 import LogInBtn from "../buttons/log-in-btn";
+import { useSelectedModelsStore } from "@/store/selected-models-store";
+import ModelSelect from "./model-select";
 
 interface Props {
   chat?: Chat;
@@ -30,6 +32,8 @@ export default function ChatComponent({
     userName,
     handleSubmit,
     toggleTemporary,
+    selectedModel,
+    setSelectedModel,
   } = useChatController({ chat, initialMessages });
   const session = useSession();
   const isAuthenticated = !!session.data?.user;
@@ -83,17 +87,23 @@ export default function ChatComponent({
         </section>
       )}
 
-      {/* Тогглер «временного» режима — просто ставим параметр query */}
-      {!chatId && isAuthenticated && (
-        <MessageCircleIcon
-          className={`cursor-pointer absolute top-5 right-5 ${
-            isTemporary
-              ? "text-blue-500 dark:text-blue-400"
-              : "text-black dark:text-white"
-          } size-6`}
-          onClick={toggleTemporary}
+      <div className="absolute top-5 right-5 flex items-center gap-3">
+        <ModelSelect
+          selectedModel={selectedModel}
+          setSelectedModel={setSelectedModel}
         />
-      )}
+        |
+        {!chatId && isAuthenticated && (
+          <MessageCircleIcon
+            className={`cursor-pointer  ${
+              isTemporary
+                ? "text-blue-500 dark:text-blue-400"
+                : "text-black dark:text-white"
+            } size-6`}
+            onClick={toggleTemporary}
+          />
+        )}
+      </div>
 
       {!isAuthenticated && (
         <div className="absolute top-4 right-10">

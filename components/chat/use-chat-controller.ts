@@ -21,6 +21,8 @@ import { CLIENT_ROUTES } from "@/lib/client-routes";
 import { streamAI } from "@/lib/ai-stream";
 
 import { Chat, Message, MessageRole } from "@prisma/client";
+import { MESSAGE_LENGTH_LIMIT } from "@/constants/message-limit";
+import { useSelectedModelsStore } from "@/store/selected-models-store";
 
 const EMPTY_MESSAGES: Message[] = [];
 export const TEMP_CHAT_ID = -1; // ключ для временного чата в сторах/локальном UI
@@ -103,6 +105,12 @@ export function useChatController({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
+    if (input.trim().length > MESSAGE_LENGTH_LIMIT) {
+      toast.error(
+        `Сообщение превышает лимит в ${MESSAGE_LENGTH_LIMIT} символов.`
+      );
+      return;
+    }
 
     let currentChat = chat;
     let currentChatId = chat?.id ?? 0;
@@ -243,6 +251,10 @@ export function useChatController({
     }
   };
 
+  // --- Model ---
+  const selectedModel = useSelectedModelsStore((s) => s.selectedModel);
+  const setSelectedModel = useSelectedModelsStore((s) => s.setSelectedModel);
+
   return {
     // состояние
     input,
@@ -258,5 +270,8 @@ export function useChatController({
     // действия
     handleSubmit,
     toggleTemporary,
-  } as const;
+    // model
+    selectedModel,
+    setSelectedModel,
+  };
 }
