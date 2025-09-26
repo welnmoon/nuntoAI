@@ -1,4 +1,5 @@
 "use client";
+import { useChatController } from "@/components/chat/use-chat-controller";
 import { Forward, LoaderCircle } from "lucide-react";
 import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
@@ -20,6 +21,7 @@ const SendToAIForm = ({
 }: Props) => {
   const missingHandlers = !handleSubmit || !setInput || input === undefined;
   const toastIdRef = useRef<string | null>(null);
+  const { isTemporary } = useChatController({});
 
   useEffect(() => {
     if (loading) {
@@ -48,9 +50,16 @@ const SendToAIForm = ({
         }}
         value={input}
         onChange={(e) => setInput!(e.target.value)}
-        placeholder="Введите сообщение для ИИ..."
-        className="dark:border-none shadow-md py-3 px-5 bg-white border border-gray-300 rounded-3xl resize-none focus:outline-none
-        dark:bg-zinc-800"
+        placeholder="Спросите что нибудь..."
+        onInput={(e) => {
+          const target = e.target as HTMLTextAreaElement;
+          target.style.height = "auto";
+          target.style.height = target.scrollHeight + "px";
+        }}
+        className={`min-h-[60px] max-h-[300px] dark:border-none shadow-md py-3 px-5 border border-gray-300 rounded-3xl resize-none focus:outline-none
+        dark:bg-zinc-800 ${
+          isTemporary && "bg-neutral-800 text-white dark:bg-neutral-800"
+        }`}
         rows={2}
         disabled={isFormDisabled}
       />
