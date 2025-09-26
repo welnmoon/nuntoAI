@@ -8,13 +8,14 @@
  */
 export async function streamAI(
   message: string,
+  selectedModel: string,
   signal: AbortSignal,
   onChunk: (chunk: string, full: string) => void
 ): Promise<string> {
   const res = await fetch("/api/openai", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, model: selectedModel }),
     signal,
   });
 
@@ -34,4 +35,3 @@ export async function streamAI(
 
   return fullReply;
 }
-

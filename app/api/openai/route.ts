@@ -1,8 +1,14 @@
+import {
+  MODELS,
+  TariffSlug,
+  isModelAllowedForTariff,
+} from "@/constants/allowed-models";
 import { MESSAGE_LENGTH_LIMIT } from "@/constants/message-limit";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { prisma } from "@/prisma/prisma-client";
 
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
@@ -19,7 +25,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not Auth" }, { status: 401 });
   }
   try {
-    const { message } = await req.json();
+    const { message, model } = await req.json();
     if (!message || typeof message !== "string") {
       return NextResponse.json(
         { error: "Invalid or missing message." },
@@ -34,10 +40,44 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    // При необходимости можно получить userId через getServerSession
+
+    if (!model || typeof model !== "string") {
+      return NextResponse.json(
+        { error: "Invalid or missing model." },
+        { status: 400 }
+      );
+    }
+    const exists = MODELS.has(model);
+    if (!exists) {
+      return NextResponse.json(
+        { error: "Invalid or missing model." },
+        { status: 400 }
+      );
+    }
+
+    let tariffSlug: TariffSlug = "free";
+    const numericUserId = Number(session.user.id);
+    if (!Number.isNaN(numericUserId)) {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: numericUserId },
+        include: { tariff: true },
+      });
+      if (dbUser?.tariff?.slug) {
+        tariffSlug = dbUser.tariff.slug as TariffSlug;
+      }
+    }
+
+    if (!isModelAllowedForTariff(model, tariffSlug)) {
+      return NextResponse.json(
+        {
+          error: "Эта модель доступна только на платном тарифе.",
+        },
+        { status: 403 }
+      );
+    }
 
     const completion = await openai.chat.completions.create({
-      model: "x-ai/grok-4-fast:free",
+      model: model,
       messages: [{ role: "user", content: message }],
       max_tokens: 512,
       stream: true,

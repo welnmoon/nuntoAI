@@ -5,27 +5,53 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ALLOWED_MODELS } from "@/constants/allowed-models";
+import {
+  MODEL_LIST,
+  TARIFF_LABELS,
+  TariffSlug,
+  isModelAllowedForTariff,
+} from "@/constants/allowed-models";
 
 const ModelSelect = ({
   selectedModel,
   setSelectedModel,
+  tariffSlug,
 }: {
   selectedModel: string;
   setSelectedModel: (model: string) => void;
+  tariffSlug: TariffSlug;
 }) => {
-  const models = ALLOWED_MODELS;
   return (
     <Select value={selectedModel} onValueChange={setSelectedModel}>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder={selectedModel} />
+      <SelectTrigger className="w-[220px]">
+        <SelectValue placeholder="Выберите модель" />
       </SelectTrigger>
       <SelectContent>
-        {[...models].map((m) => (
-          <SelectItem value={m} onClick={() => setSelectedModel(m)} key={m}>
-            {m}
-          </SelectItem>
-        ))}
+        {MODEL_LIST.map((model) => {
+          const allowed = isModelAllowedForTariff(model.id, tariffSlug);
+          return (
+            <SelectItem
+              value={model.id}
+              key={model.id}
+              disabled={!allowed}
+              className={!allowed ? "opacity-70" : undefined}
+            >
+              <div className="flex flex-col gap-0.5">
+                <span className="text-sm font-medium">{model.label}</span>
+                {model.description && (
+                  <span className="text-[11px] text-muted-foreground">
+                    {model.description}
+                  </span>
+                )}
+                {!allowed && (
+                  <span className="text-[11px] text-amber-600">
+                    Доступно с тарифа {TARIFF_LABELS[model.minTariff]}
+                  </span>
+                )}
+              </div>
+            </SelectItem>
+          );
+        })}
       </SelectContent>
     </Select>
   );

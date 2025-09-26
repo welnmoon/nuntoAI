@@ -19,6 +19,11 @@ import { useQuerySetter } from "@/hooks/use-query-setter";
 import { useChatStore } from "@/store/chats-store";
 import { CLIENT_ROUTES } from "@/lib/client-routes";
 import { streamAI } from "@/lib/ai-stream";
+import {
+  fromUnknownTariff,
+  getDefaultModelForTariff,
+  isModelAllowedForTariff,
+} from "@/constants/allowed-models";
 
 import { Chat, Message, MessageRole } from "@prisma/client";
 import { MESSAGE_LENGTH_LIMIT } from "@/constants/message-limit";
@@ -29,7 +34,7 @@ export const TEMP_CHAT_ID = -1; // ключ для временного чата
 
 interface UseChatControllerParams {
   chat?: Chat;
-  initialMessages: Message[];
+  initialMessages?: Message[];
 }
 
 export function useChatController({
@@ -39,7 +44,7 @@ export function useChatController({
   // --- Базовые состояния UI ---
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>(initialMessages ?? []);
 
   // --- Ссылки для скролла и отмены стрима ---
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -49,6 +54,7 @@ export function useChatController({
   const { data: session } = useSession();
   const userName = session?.user?.name || "Гость";
   const isAuth = !!session?.user;
+  const tariffSlug = fromUnknownTariff(session?.user?.tariffSlug);
   const pathName = usePathname();
   const searchParams = useSearchParams();
 
@@ -76,7 +82,7 @@ export function useChatController({
 
   // при получении настоящих сообщений очищаем черновики этого чата
   useEffect(() => {
-    setMessages(initialMessages);
+    setMessages(initialMessages ?? []);
     if (chat?.id) clearPendingMessages(chat.id);
   }, [initialMessages, chat?.id, clearPendingMessages]);
 
@@ -148,20 +154,25 @@ export function useChatController({
         userMsg.chatId = TEMP_CHAT_ID;
         assistantMsg.chatId = TEMP_CHAT_ID;
 
-        await streamAI(userMsg.content, signal, (_chunk, fullReply) => {
-          setMessages((prev) => {
-            const arr = [...prev];
-            const idx = arr.findIndex((m) => m.id === assistantMsg.id);
-            if (idx !== -1) {
-              arr[idx] = {
-                ...assistantMsg,
-                content: fullReply,
-                chatId: TEMP_CHAT_ID,
-              };
-            }
-            return arr;
-          });
-        });
+        await streamAI(
+          userMsg.content,
+          selectedModel,
+          signal,
+          (_chunk, fullReply) => {
+            setMessages((prev) => {
+              const arr = [...prev];
+              const idx = arr.findIndex((m) => m.id === assistantMsg.id);
+              if (idx !== -1) {
+                arr[idx] = {
+                  ...assistantMsg,
+                  content: fullReply,
+                  chatId: TEMP_CHAT_ID,
+                };
+              }
+              return arr;
+            });
+          }
+        );
 
         return; // для временного чата на этом всё
       }
@@ -214,7 +225,9 @@ export function useChatController({
       // Стримим ответ ассистента и по мере прихода чанков обновляем последний месседж
       const fullReply = await streamAI(
         userMsg.content,
+        selectedModel,
         signal,
+
         (_chunk, full) => {
           setMessages((prev) => {
             const arr = [...prev];
@@ -255,6 +268,13 @@ export function useChatController({
   const selectedModel = useSelectedModelsStore((s) => s.selectedModel);
   const setSelectedModel = useSelectedModelsStore((s) => s.setSelectedModel);
 
+  useEffect(() => {
+    if (!isModelAllowedForTariff(selectedModel, tariffSlug)) {
+      const fallbackModel = getDefaultModelForTariff(tariffSlug);
+      setSelectedModel(fallbackModel);
+    }
+  }, [selectedModel, setSelectedModel, tariffSlug]);
+
   return {
     // состояние
     input,
@@ -273,5 +293,6 @@ export function useChatController({
     // model
     selectedModel,
     setSelectedModel,
+    tariffSlug,
   };
 }

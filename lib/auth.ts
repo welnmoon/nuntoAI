@@ -6,6 +6,7 @@ import { prisma } from "@/prisma/prisma-client";
 import { compare } from "bcryptjs";
 import { JWT } from "next-auth/jwt";
 import { Session, User, AuthOptions } from "next-auth";
+import { fromUnknownTariff } from "@/constants/allowed-models";
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -74,15 +75,36 @@ export const authOptions: AuthOptions = {
         token.fullName = user.name ?? null;
       }
 
-      if (!token.id && token.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email },
-        });
-        token.id = dbUser?.id;
-        token.name = token.name ?? dbUser?.fullName ?? null;
-        token.fullName =
-          token.fullName ?? dbUser?.fullName ?? null;
+      const maybeId = user?.id ?? token.id;
+      let dbUser = null;
+
+      if (maybeId !== undefined && maybeId !== null) {
+        const numericId = Number(maybeId);
+        if (!Number.isNaN(numericId)) {
+          dbUser = await prisma.user.findUnique({
+            where: { id: numericId },
+            include: { tariff: true },
+          });
+        }
       }
+
+      if (!dbUser && token.email) {
+        dbUser = await prisma.user.findUnique({
+          where: { email: token.email },
+          include: { tariff: true },
+        });
+      }
+
+      if (dbUser) {
+        token.id = dbUser.id;
+        token.name = token.name ?? dbUser.fullName ?? dbUser.name ?? null;
+        token.fullName =
+          token.fullName ?? dbUser.fullName ?? dbUser.name ?? null;
+        token.tariffSlug = fromUnknownTariff(dbUser.tariff?.slug);
+      } else if (!token.tariffSlug) {
+        token.tariffSlug = "free";
+      }
+
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
@@ -93,6 +115,9 @@ export const authOptions: AuthOptions = {
         session.user.fullName = fullName;
       }
       if (token?.email) session.user.email = token.email;
+      session.user.tariffSlug = fromUnknownTariff(
+        token.tariffSlug as string | undefined
+      );
       return session;
     },
   },

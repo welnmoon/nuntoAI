@@ -1,5 +1,6 @@
 import "next-auth";
 import "next-auth/jwt";
+import type { TariffSlug } from "@/constants/allowed-models";
 
 declare module "next-auth" {
   interface Session {
@@ -10,6 +11,7 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       emailVerified?: Date | string | null;
+      tariffSlug?: TariffSlug;
     };
   }
 }
@@ -18,5 +20,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     id?: number | string;
     fullName?: string | null;
+    tariffSlug?: TariffSlug;
   }
 }
