@@ -10,7 +10,7 @@ import { ThemeProviders } from "./theme-provider";
 import ModelSelect from "../chat/model-select";
 import { useSelectedModelsStore } from "@/store/selected-models-store";
 import { useChatController } from "../chat/use-chat-controller";
-import { Check, MessageCircleDashed, MessageCircleIcon } from "lucide-react";
+import { Check, MessageCircleDashed } from "lucide-react";
 import VerticalDivider from "../vertical-divider";
 import { usePathname } from "next/navigation";
 
@@ -40,16 +40,16 @@ function AuthGate({
   const { data: clientSession, status } = useSession();
   const isAuthenticated = !!clientSession?.user;
 
-  if (status === "loading") {
-    return <div>{children}</div>;
-  }
+ 
   const selectedModel = useSelectedModelsStore((s) => s.selectedModel);
   const setSelectedModel = useSelectedModelsStore((s) => s.setSelectedModel);
   const { tariffSlug, isTemporary, toggleTemporary, chatId } =
     useChatController({});
   const pathname = usePathname();
   const isChatIdInURL = pathname?.includes("/chat/");
-
+ if (status === "loading") {
+    return <div>{children}</div>;
+  }
   return isAuthenticated ? (
     <SidebarProvider className="bg-gray-50 dark:bg-gray-900" defaultOpen>
       <GlobalSidebarToggle />
