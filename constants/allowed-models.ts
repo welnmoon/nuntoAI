@@ -81,7 +81,9 @@ function isModelAllowedForTariff(
   return getTariffOrder(tariff) >= TARIFF_ORDER[model.minTariff];
 }
 
-function getModelsForTariff(tariff: TariffSlug | null | undefined): ModelInfo[] {
+function getModelsForTariff(
+  tariff: TariffSlug | null | undefined
+): ModelInfo[] {
   return MODEL_LIST.filter((model) =>
     isModelAllowedForTariff(model.id, tariff)
   );
@@ -99,6 +101,13 @@ function getDefaultModelForTariff(
   return firstAllowed ?? DEFAULT_MODEL;
 }
 
+function getTariffLabelById(id: number): string | undefined {
+  const slug = (Object.keys(TARIFF_ORDER) as TariffSlug[]).find(
+    (key) => TARIFF_ORDER[key] === id
+  );
+  return slug ? TARIFF_LABELS[slug] : undefined;
+}
+
 export {
   DEFAULT_MODEL,
   FALLBACK_MODEL_BY_TARIFF,
@@ -110,4 +119,5 @@ export {
   getModelsForTariff,
   isModelAllowedForTariff,
   isModelSupported,
+  getTariffLabelById,
 };

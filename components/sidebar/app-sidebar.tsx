@@ -146,7 +146,15 @@ export function AppSidebar({ chats }: { chats?: Chat[] }) {
                 isCollapsed && "pl-2  "
               }`}
             >
-              <UserCircle className="size-7 shrink-0" />
+              {/* <UserCircle className="size-7 shrink-0" /> */}
+              <img
+                className="size-7 shrink-0 rounded-full"
+                src={
+                  session?.user?.image ||
+                  "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+                }
+                alt=""
+              ></img>
               <span
                 className={cn(
                   "min-w-0 truncate transition-opacity duration-200 ",

@@ -8,9 +8,11 @@ import {
 } from "@/components/ui/popover";
 
 import { Session } from "next-auth";
-import { Settings, UserCircle } from "lucide-react";
+import { Settings, User, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import LogOutBtn from "../buttons/log-out-btn";
+import { useRouter } from "next/navigation";
+import { CLIENT_ROUTES } from "@/lib/client-routes";
 
 export default function ProfileModal({
   openModal,
@@ -26,6 +28,7 @@ export default function ProfileModal({
   trigger: React.ReactNode;
 }) {
   const isAuthenticated = !!session?.user;
+  const router = useRouter();
   return (
     <Popover open={openModal} onOpenChange={setOpenModal}>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
@@ -46,6 +49,20 @@ export default function ProfileModal({
               )}
             >
               {session?.user?.email || "Гость"}
+            </span>
+          </p>
+          <p
+            onClick={() => router.push(CLIENT_ROUTES.profile)}
+            className="flex gap-2 items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 px-2 py-1 rounded-md transition-colors duration-200"
+          >
+            <User color="gray" className="size-4" />
+
+            <span
+              className={cn(
+                "min-w-0 truncate transition-opacity duration-200 "
+              )}
+            >
+              Профиль
             </span>
           </p>
           <p

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { getTariffLabelById } from "@/constants/allowed-models";
 import { User } from "@prisma/client";
 
 const ProfileUserSection = ({ user }: { user: User }) => {
@@ -8,7 +8,7 @@ const ProfileUserSection = ({ user }: { user: User }) => {
         <h1 className="text-3xl font-bold mb-4">Профиль пользователя</h1>
         {user?.image ? (
           <div className="flex justify-center mb-4">
-            <Image
+            <img
               src={user.image}
               alt={user.name || "User avatar"}
               width={80}
@@ -35,6 +35,7 @@ const ProfileUserSection = ({ user }: { user: User }) => {
           <span className="font-semibold">ID:&nbsp;</span>{" "}
           {user?.id || "Неизвестно"}
         </div>
+        <div>tariff: {getTariffLabelById(user?.tariffId || 0)}</div>
       </div>
     </main>
   );
